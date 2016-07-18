@@ -1,0 +1,26 @@
+{
+  "name": "preact-custom-element",
+  "version": "1.0.0",
+  "description": "Wrap your component up as a custom element",
+  "main": "src/index.js",
+  "scripts": {
+    "test": "npm test"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/bspaulding/preact-custom-element.git"
+  },
+  "keywords": [
+    "preact",
+    "web",
+    "components",
+    "custom",
+    "element"
+  ],
+  "author": "Bradley J. Spaulding",
+  "license": "MIT",
+  "bugs": {
+    "url": "https://github.com/bspaulding/preact-custom-element/issues"
+  },
+  "homepage": "https://github.com/bspaulding/preact-custom-element#readme"
+}
