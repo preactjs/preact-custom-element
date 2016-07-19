@@ -4,6 +4,8 @@ Generate/register a custom element from a preact component.
 
 ## Usage
 
+Import `CustomElement` and call with your component and a tag name:
+
 ```javascript
 import CustomElement from "preact-custom-element";
 
@@ -14,14 +16,16 @@ const Greeting = ({ name = "World" }) => (
 CustomElement(Greeting, "x-greeting");
 ```
 
+Use the new tag name in HTML, attribute keys and values will be passed in as props:
+
 ```html
-	<x-greeting name="Billy Jo"></x-greeting>
+<x-greeting name="Billy Jo"></x-greeting>
 ```
 
 Output:
 
 ```html
-	<p>Hello, Billy Jo!</p>
+<p>Hello, Billy Jo!</p>
 ```
 
 ## Related
