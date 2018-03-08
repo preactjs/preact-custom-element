@@ -5,7 +5,7 @@
   "main": "dist/bundle.js",
   "jsnext:main": "src/index.js",
   "scripts": {
-    "test": "npm test"
+    "test": "karma start"
   },
   "repository": {
     "type": "git",
