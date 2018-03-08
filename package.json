@@ -31,6 +31,13 @@
     "babel-plugin-transform-react-jsx": "6.8.0",
     "babel-preset-es2015": "6.9.0",
     "babel-preset-react": "6.11.1",
+    "karma": "^2.0.0",
+    "karma-chrome-launcher": "^2.2.0",
+    "karma-firefox-launcher": "^1.1.0",
+    "karma-ie-launcher": "^1.0.0",
+    "karma-mocha": "^1.3.0",
+    "karma-opera-launcher": "^1.0.0",
+    "karma-safari-launcher": "^1.0.0",
     "webpack": "1.13.1"
   }
 }
