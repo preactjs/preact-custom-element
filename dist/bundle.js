@@ -166,12 +166,12 @@ return /******/ (function(modules) { // webpackBootstrap
 			}, {
 				key: 'renderElement',
 				value: function renderElement() {
-					(0, _preact.render)(toVdom(this, this._vdomComponent), this.shadowRoot, this._root);
+					(0, _preact.render)(toVdom(this, this._vdomComponent), this);
 				}
 			}, {
 				key: 'unrenderElement',
 				value: function unrenderElement() {
-					(0, _preact.render)((0, _preact.h)(Empty), this.shadowRoot, this._root);
+					(0, _preact.render)((0, _preact.h)(Empty), this);
 				}
 			}]);
 

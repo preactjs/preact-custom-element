@@ -38,11 +38,11 @@ function wrapPreactComponent(Component, tagName) {
 	
 	
 		renderElement() {
-			render(toVdom(this, this._vdomComponent), this.shadowRoot, this._root);			
+			render(toVdom(this, this._vdomComponent), this);			
 		}
 	
 		unrenderElement() {
-			render(h(Empty), this.shadowRoot, this._root);
+			render(h(Empty), this);
 		}
 	}
 }
