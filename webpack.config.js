@@ -1,15 +1,15 @@
 module.exports = {
 	entry: "./src/index.js",
 	output: {
-		path: "dist",
+		path: __dirname+"/dist",
 		filename: "bundle.js",
 		libraryTarget: "umd"
 	},
 	module: {
-		loaders: [{
+		rules: [{
 			test: /\.js$/,
 			exclude: /(node_modules|bower_components)/,
-			loader: "babel",
+			loader: "babel-loader",
 			query: {
 				presets: ["es2015", "react"],
 				plugins: [
@@ -20,5 +20,6 @@ module.exports = {
 	},
 	externals: {
 		preact: "preact"
-	}
+	},
+	mode: "production"
 };
