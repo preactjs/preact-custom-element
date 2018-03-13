@@ -60,7 +60,7 @@ module.exports = function(config) {
 
     // start these browsers
     // available browser launchers: https://npmjs.org/browse/keyword/karma-launcher
-    browsers: ['bs_firefox', 'Chrome', 'ChromeCanary', /* 'Firefox', 'Opera', 'IE', 'Safari' */],
+    browsers: ['bs_safari', 'bs_firefox', 'Chrome', 'ChromeCanary', /* 'Firefox', 'Opera', 'IE', 'Safari' */],
 
     browserStack: {
       username: process.env.BROWSERSTACK_USERNAME,
@@ -71,6 +71,13 @@ module.exports = function(config) {
         base: 'BrowserStack',
         browser: 'firefox',
         browser_version: '59.0 beta',
+        os: 'OS X',
+        os_version: 'High Sierra'
+      },
+      bs_safari: {
+        base: 'BrowserStack',
+        browser: 'safari',
+        browser_version: '11.0',
         os: 'OS X',
         os_version: 'High Sierra'
       }
