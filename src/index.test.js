@@ -7,7 +7,7 @@ class Clock extends Component {
 		return <span>{time}</span>;
 	}
 }
-const clockEl = registerElement(Clock, 'x-clock');
+const clockEl = registerElement(Clock, 'x-clock', ['time']);
 
 it('renders ok, updates on attr change', function() {
 	const root = document.createElement('div');
@@ -17,13 +17,11 @@ it('renders ok, updates on attr change', function() {
 	root.appendChild(el);
 	document.body.appendChild(root);
 
-	assert.equal(root.innerHTML, '<x-clock time="10:28:57 PM"></x-clock>');
-	assert.equal(el.shadowRoot.innerHTML, '<span>10:28:57 PM</span>');
+	assert.equal(root.innerHTML, '<x-clock time="10:28:57 PM"><span>10:28:57 PM</span></x-clock>');
 
 	el.setAttribute('time', '11:01:10 AM');
 
-	assert.equal(root.innerHTML, '<x-clock time="11:01:10 AM"></x-clock>');
-	assert.equal(el.shadowRoot.innerHTML, '<span>11:01:10 AM</span>');
+	assert.equal(root.innerHTML, '<x-clock time="11:01:10 AM"><span>11:01:10 AM</span></x-clock>');
 
 	document.body.removeChild(root);
 });
