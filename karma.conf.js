@@ -1,3 +1,4 @@
+require('dotenv').config();
 var webpackConfig = require('./webpack.config.js');
 
 module.exports = function(config) {
@@ -26,12 +27,12 @@ module.exports = function(config) {
     // preprocess matching files before serving them to the browser
     // available preprocessors: https://npmjs.org/browse/keyword/karma-preprocessor
     preprocessors: {
-			'src/**/*.js': ['webpack']
+      'src/**/*.js': ['webpack']
     },
 
-		webpack: {
-			module: webpackConfig.module
-		},
+    webpack: {
+      module: webpackConfig.module
+    },
 
 
     // test results reporter to use
@@ -59,8 +60,21 @@ module.exports = function(config) {
 
     // start these browsers
     // available browser launchers: https://npmjs.org/browse/keyword/karma-launcher
-    browsers: ['Chrome', 'ChromeCanary', /* 'Firefox', 'Opera', 'IE', 'Safari' */],
+    browsers: ['bs_firefox', 'Chrome', 'ChromeCanary', /* 'Firefox', 'Opera', 'IE', 'Safari' */],
 
+    browserStack: {
+      username: process.env.BROWSERSTACK_USERNAME,
+      accessKey: process.env.BROWSERSTACK_ACCESS_KEY
+    },
+    customLaunchers: {
+      bs_firefox: {
+        base: 'BrowserStack',
+        browser: 'firefox',
+        browser_version: '59.0 beta',
+        os: 'OS X',
+        os_version: 'High Sierra'
+      }
+    },
 
     // Continuous Integration mode
     // if true, Karma captures browsers, runs the tests and exits
