@@ -89,6 +89,15 @@ module.exports = function(config) {
         os_version: '11.2',
         real_mobile: true,
         device: 'iPhone SE'
+      },
+      bs_android_mobile: {
+        base: 'BrowserStack',
+        browser: 'Android Browser',
+        browser_version: null,
+        os: 'android',
+        os_version: '8.0',
+        real_mobile: true,
+        device: 'Google Pixel'
       }
     },
 
