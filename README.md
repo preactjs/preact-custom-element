@@ -1,6 +1,7 @@
 # preact-custom-element
 
-Generate/register a custom element from a preact component.
+Generate/register a custom element from a preact component. As of 3.0.0, this library implements the Custom Elements v1 spec.
+Previous versions (< 3.0.0) implemented the v0 proposal, which was only implemented in Chrome and is abandoned.
 
 ## Usage
 
