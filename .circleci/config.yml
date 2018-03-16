@@ -36,7 +36,7 @@ jobs:
       - run: wget -O ff-release.tar.bz2 'https://archive.mozilla.org/pub/firefox/releases/58.0/linux-x86_64/en-US/firefox-58.0.tar.bz2' && tar xjf ff-release.tar.bz2
 
       # run tests!
-      - run: FIREFOX_BIN=./firefox/firefox npm test -- --browsers Firefox
+      - run: FIREFOX_BIN=./firefox/firefox npm test -- --browsers FirefoxWebComponents
 
 
 
