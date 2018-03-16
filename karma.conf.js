@@ -60,7 +60,7 @@ module.exports = function(config) {
 
     // start these browsers
     // available browser launchers: https://npmjs.org/browse/keyword/karma-launcher
-    browsers: ['Chrome', 'ChromeCanary', 'FirefoxWebComponents', /* 'Opera', 'IE', 'Safari' */],
+    browsers: ['Chrome', 'ChromeCanary', 'FirefoxWebComponents', 'Safari'/* 'Opera', 'IE'*/],
 
     browserStack: {
       username: process.env.BROWSERSTACK_USERNAME,
