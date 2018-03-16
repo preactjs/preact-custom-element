@@ -98,6 +98,12 @@ module.exports = function(config) {
         os_version: '8.0',
         real_mobile: true,
         device: 'Google Pixel'
+      },
+      FirefoxWebComponents: {
+        base: 'Firefox',
+        prefs: {
+          'dom.webcomponents.enabled': true
+        }
       }
     },
 
