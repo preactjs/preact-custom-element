@@ -5,7 +5,7 @@
   "main": "dist/bundle.js",
   "jsnext:main": "src/index.js",
   "scripts": {
-    "prepublish": "NODE_ENV=production webpack -p",
+    "prepare": "NODE_ENV=production webpack -p",
     "test": "karma start"
   },
   "repository": {
