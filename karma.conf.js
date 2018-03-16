@@ -80,6 +80,15 @@ module.exports = function(config) {
         browser_version: '11.0',
         os: 'OS X',
         os_version: 'High Sierra'
+      },
+      bs_safari_mobile: {
+        base: 'BrowserStack',
+        browser: 'Mobile Safari',
+        browser_version: null,
+        os: 'ios',
+        os_version: '11.2',
+        real_mobile: true,
+        device: 'iPhone SE'
       }
     },
 
