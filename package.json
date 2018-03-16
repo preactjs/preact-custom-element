@@ -43,6 +43,7 @@
     "karma-webpack": "^2.0.13",
     "mocha": "^5.0.4",
     "preact": "^8.2.7",
+    "prettier": "^1.11.1",
     "webpack": "1.13.1"
   }
 }
