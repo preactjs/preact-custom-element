@@ -17,11 +17,17 @@ it('renders ok, updates on attr change', function() {
 	root.appendChild(el);
 	document.body.appendChild(root);
 
-	assert.equal(root.innerHTML, '<x-clock time="10:28:57 PM"><span>10:28:57 PM</span></x-clock>');
+	assert.equal(
+		root.innerHTML,
+		'<x-clock time="10:28:57 PM"><span>10:28:57 PM</span></x-clock>'
+	);
 
 	el.setAttribute('time', '11:01:10 AM');
 
-	assert.equal(root.innerHTML, '<x-clock time="11:01:10 AM"><span>11:01:10 AM</span></x-clock>');
+	assert.equal(
+		root.innerHTML,
+		'<x-clock time="11:01:10 AM"><span>11:01:10 AM</span></x-clock>'
+	);
 
 	document.body.removeChild(root);
 });
