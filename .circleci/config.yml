@@ -34,7 +34,7 @@ jobs:
           key: v1-dependencies-{{ checksum "package.json" }}
 
       # run tests!
-      - run: npm test -- --browsers Chrome,bs_safari,bs_android_mobile
+      - run: npm test -- --browsers Firefox
 
 
 
