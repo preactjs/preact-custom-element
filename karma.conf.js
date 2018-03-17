@@ -86,8 +86,8 @@ module.exports = function(config) {
         browser: 'Mobile Safari',
         browser_version: null,
         os: 'ios',
-        os_version: '11.2',
-        real_mobile: true,
+        os_version: '10.3',
+        real_mobile: false,
         device: 'iPhone SE'
       },
       bs_android_mobile: {
