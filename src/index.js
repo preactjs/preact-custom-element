@@ -67,6 +67,16 @@ export default function register(Component, tagName, propNames) {
 			return _this;
 		}
 
+		const blacklistedNames = ['constructor', 'render'];
+		const userPublicProps = Object.getOwnPropertyNames(Component.prototype)
+			.filter(key => blacklistedNames.indexOf(key) < 0)
+			.map(key => ({
+				key,
+				value: function(...args) {
+					return Component.prototype[key].apply(this._root._component, args);
+				}
+			}));
+
 		_createClass(
 			klass,
 			[
@@ -88,7 +98,7 @@ export default function register(Component, tagName, propNames) {
 						unRenderElement.apply(this);
 					}
 				}
-			],
+			].concat(userPublicProps),
 			[
 				{
 					key: 'observedAttributes',

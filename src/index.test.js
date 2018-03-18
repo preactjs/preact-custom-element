@@ -31,3 +31,38 @@ it('renders ok, updates on attr change', function() {
 
 	document.body.removeChild(root);
 });
+
+it('exposes public properties on the custom element node', function(done) {
+	class HasInstanceMethod extends Component {
+		greet(name) {
+			this.setState({ name });
+		}
+
+		render() {
+			return <span>Hello, {this.state.name || 'World'}</span>;
+		}
+	}
+	registerElement(HasInstanceMethod, 'x-has-prop');
+
+	const root = document.createElement('div');
+	const el = document.createElement('x-has-prop');
+	root.appendChild(el);
+	document.body.appendChild(root);
+
+	assert.equal(
+		root.innerHTML,
+		'<x-has-prop><span>Hello, World</span></x-has-prop>'
+	);
+
+	el.greet('Brad');
+
+	setTimeout(() => {
+		assert.equal(
+			root.innerHTML,
+			'<x-has-prop><span>Hello, Brad</span></x-has-prop>'
+		);
+
+		document.body.removeChild(root);
+		done();
+	});
+});
