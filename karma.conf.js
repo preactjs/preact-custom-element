@@ -81,13 +81,22 @@ module.exports = function(config) {
         os: 'OS X',
         os_version: 'High Sierra'
       },
-      bs_safari_mobile: {
+      bs_mobile_safari_10_3: {
         base: 'BrowserStack',
         browser: 'Mobile Safari',
         browser_version: null,
         os: 'ios',
         os_version: '10.3',
         real_mobile: false,
+        device: 'iPhone SE'
+      },
+      bs_mobile_safari_11_2: {
+        base: 'BrowserStack',
+        browser: 'Mobile Safari',
+        browser_version: null,
+        os: 'ios',
+        os_version: '11.2',
+        real_mobile: true,
         device: 'iPhone SE'
       },
       bs_android_mobile: {
@@ -98,6 +107,13 @@ module.exports = function(config) {
         os_version: '8.0',
         real_mobile: true,
         device: 'Google Pixel'
+      },
+      bs_win10_opera_41: {
+        base: 'BrowserStack',
+        browser: 'opera',
+        browser_version: '41.0',
+        os: 'Windows',
+        os_version: '10'
       },
       FirefoxWebComponents: {
         base: 'Firefox',
