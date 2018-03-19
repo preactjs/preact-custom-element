@@ -43,3 +43,10 @@ It's possible that a compile step could introspect your usages of props and gene
 ## Related
 
 [preact-shadow-dom](https://github.com/bspaulding/preact-shadow-dom)
+
+## Thanks
+
+Big thanks to BrowserStack for providing service for CI on this project! BrowserStack allows us to test this project on all real browsers that support Custom Elements, including mobile browsers.
+
+<a href="https://www.browserstack.com" target="_blank" rel="noopener noreferrer"><img src="https://p14.zdusercontent.com/attachment/1015988/9muQl92dJ9ShKIGmIt7iaICUb?token=eyJhbGciOiJkaXIiLCJlbmMiOiJBMTI4Q0JDLUhTMjU2In0..W4aqOGR0iTl_Rh1nskJGRQ.gLdLdkMD8vfZdJ7eqZpU6lmB-yGQv2hCYRJeBQ91WtaJzpYMQQUEWNE0oK3xLjBKYPKWA9D1UlA-beeUwlczRKVF8ZoG8OMDg6K3vVIIFKH3an8QfcH0iFQXhH4m6cmXqoPAcqDXvrpv3DUXIQaxD8bXykKFpBR5gEk6m3VsH8geK4UxzQ3ORYCOv4XD8EPm-Ap0lZwVZaGMHAncCP9dlOVhZjVVDKwBI5cwFOa_jSwtsCbgW3EX901k-nu1w6IlgFvWh8mxMaM4DMtVtCGfnuNspN7qYXJRTgMEVPVIk8o.bKvlbSGn8PntRSHO7sgBSA" height="150"/>
+</a>
