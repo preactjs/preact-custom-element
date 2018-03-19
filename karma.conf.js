@@ -1,11 +1,14 @@
 require('dotenv').config();
 var webpackConfig = require('./webpack.config.js');
+var ip = require('ip');
 
 module.exports = function(config) {
   config.set({
 
     // base path that will be used to resolve all patterns (eg. files, exclude)
     basePath: '',
+
+    hostname: ip.address(),
 
 
     // frameworks to use
