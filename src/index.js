@@ -53,8 +53,7 @@ function _inherits(subClass, superClass) {
 			? Object.setPrototypeOf(subClass, superClass)
 			: (subClass.__proto__ = superClass);
 }
-
-export default function register(Component, tagName, propNames) {
+export default function register(Component, tagName, propNames, publicMethods = []) {
 	let klass = (function(_HTMLElement) {
 		_inherits(klass, _HTMLElement);
 
@@ -67,9 +66,7 @@ export default function register(Component, tagName, propNames) {
 			return _this;
 		}
 
-		const blacklistedNames = ['constructor', 'render'];
-		const userPublicProps = Object.getOwnPropertyNames(Component.prototype)
-			.filter(key => blacklistedNames.indexOf(key) < 0)
+		const userPublicProps = publicMethods
 			.map(key => ({
 				key,
 				value: function(...args) {

@@ -42,7 +42,7 @@ it('exposes public properties on the custom element node', function(done) {
 			return <span>Hello, {this.state.name || 'World'}</span>;
 		}
 	}
-	registerElement(HasInstanceMethod, 'x-has-prop');
+	registerElement(HasInstanceMethod, 'x-has-prop', [], ['greet']);
 
 	const root = document.createElement('div');
 	const el = document.createElement('x-has-prop');
