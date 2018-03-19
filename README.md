@@ -1,6 +1,7 @@
 # preact-custom-element
 
-[![CircleCI](https://circleci.com/gh/bspaulding/preact-custom-element/tree/master.svg?style=svg)](https://circleci.com/gh/bspaulding/preact-custom-element/tree/master)
+[![CircleCI](https://circleci.com/gh/bspaulding/preact-custom-element/tree/master.svg?style=shield)](https://circleci.com/gh/bspaulding/preact-custom-element/tree/master)
+[![BrowserStack Status](https://www.browserstack.com/automate/badge.svg?badge_key=VHpBSXVTajJPOWl5OURJRlY5VE9yaW9hbmh1ZFBXd1BTY1pId3pHQk02MD0tLUNqd0pMaVVvU3ppWnZuSFA3OExvOHc9PQ==--81bc10ad2712a85711a0999c04adeca09cf61b7b%)](https://www.browserstack.com/automate/public-build/VHpBSXVTajJPOWl5OURJRlY5VE9yaW9hbmh1ZFBXd1BTY1pId3pHQk02MD0tLUNqd0pMaVVvU3ppWnZuSFA3OExvOHc9PQ==--81bc10ad2712a85711a0999c04adeca09cf61b7b%)
 
 Generate/register a custom element from a preact component. As of 3.0.0, this library implements the Custom Elements v1 spec.
 Previous versions (< 3.0.0) implemented the v0 proposal, which was only implemented in Chrome and is abandoned.
