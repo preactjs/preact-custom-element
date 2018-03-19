@@ -102,7 +102,7 @@ module.exports = function(config) {
         real_mobile: true,
         device: 'iPhone SE'
       },
-      bs_android_mobile: {
+      bs_android: {
         base: 'BrowserStack',
         browser: 'Android Browser',
         browser_version: null,
