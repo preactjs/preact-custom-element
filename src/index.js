@@ -2,108 +2,36 @@ import { h, render } from 'preact';
 
 const Empty = () => null;
 
-var _createClass = (function() {
-	function defineProperties(target, props) {
-		for (var i = 0; i < props.length; i++) {
-			var descriptor = props[i];
-			descriptor.enumerable = descriptor.enumerable || false;
-			descriptor.configurable = true;
-			if ('value' in descriptor) descriptor.writable = true;
-			Object.defineProperty(target, descriptor.key, descriptor);
-		}
+export default function register(Component, tagName, propNames) {
+	function PreactCustomElement() {
+		var self = Reflect.construct(HTMLElement, [], PreactCustomElement);
+		self._vdomComponent = Component;
+		return self;
 	}
-	return function(Constructor, protoProps, staticProps) {
-		if (protoProps) defineProperties(Constructor.prototype, protoProps);
-		if (staticProps) defineProperties(Constructor, staticProps);
-		return Constructor;
-	};
-})();
-function _classCallCheck(instance, Constructor) {
-	if (!(instance instanceof Constructor)) {
-		throw new TypeError('Cannot call a class as a function');
-	}
-}
-function _possibleConstructorReturn(self, call) {
-	if (!self) {
-		throw new ReferenceError(
-			"this hasn't been initialised - super() hasn't been called"
-		);
-	}
-	return call && (typeof call === 'object' || typeof call === 'function')
-		? call
-		: self;
-}
-function _inherits(subClass, superClass) {
-	if (typeof superClass !== 'function' && superClass !== null) {
-		throw new TypeError(
-			'Super expression must either be null or a function, not ' +
-				typeof superClass
-		);
-	}
-	subClass.prototype = Object.create(superClass && superClass.prototype, {
-		constructor: {
-			value: subClass,
-			enumerable: false,
-			writable: true,
-			configurable: true
+
+	PreactCustomElement.prototype = Object.create(HTMLElement.prototype);
+	Object.setPrototypeOf(PreactCustomElement, HTMLElement);
+
+	Object.assign(PreactCustomElement.prototype, {
+		constructor: PreactCustomElement,
+		connectedCallback() {
+			renderElement.apply(this);
+		},
+		attributeChangedCallback() {
+			renderElement.apply(this);
+		},
+		detachedCallback() {
+			unRenderElement.apply(this);
 		}
 	});
-	if (superClass)
-		Object.setPrototypeOf
-			? Object.setPrototypeOf(subClass, superClass)
-			: (subClass.__proto__ = superClass);
-}
 
-export default function register(Component, tagName, propNames) {
-	let klass = (function(_HTMLElement) {
-		_inherits(klass, _HTMLElement);
+	Object.defineProperty(PreactCustomElement, 'observedAttributes', {
+		get: () => propNames
+	});
 
-		function klass() {
-			_classCallCheck(this, klass);
-
-			var _this = Reflect.construct(HTMLElement, [], klass);
-
-			_this._vdomComponent = Component;
-			return _this;
-		}
-
-		_createClass(
-			klass,
-			[
-				{
-					key: 'connectedCallback',
-					value: function connectedCallback() {
-						renderElement.apply(this);
-					}
-				},
-				{
-					key: 'attributeChangedCallback',
-					value: function attributeChangedCallback() {
-						renderElement.apply(this);
-					}
-				},
-				{
-					key: 'detachedCallback',
-					value: function detachedCallback() {
-						unRenderElement.apply(this);
-					}
-				}
-			],
-			[
-				{
-					key: 'observedAttributes',
-					get: function() {
-						return propNames;
-					}
-				}
-			]
-		);
-
-		return klass;
-	})(HTMLElement);
-	return window.customElements.define(
+	return customElements.define(
 		tagName || Component.displayName || Component.name,
-		klass
+		PreactCustomElement
 	);
 }
 
