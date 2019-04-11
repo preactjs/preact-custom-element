@@ -123,7 +123,12 @@ function toVdom(element, nodeName) {
 		i = 0,
 		a = element.attributes,
 		cn = element.childNodes;
-	for (i = a.length; i--; ) props[a[i].name] = a[i].value;
+	for (i = a.length; i--; ) {
+	  var propName = a[i].name.replace(/-(\w)/, function(_, c) {
+	    return c ? c.toUpperCase() : ''
+	  });
+	  props[propName] = a[i].value;
+  }
 	for (i = cn.length; i--; ) children[i] = toVdom(cn[i]);
 	return h(nodeName || element.nodeName.toLowerCase(), props, children);
 }
