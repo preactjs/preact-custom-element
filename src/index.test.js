@@ -1,15 +1,14 @@
 import assert from 'assert';
-import { h, Component } from 'preact';
+import { h } from 'preact';
 import registerElement from './index';
 
-class Clock extends Component {
-	render({ time }) {
-		return <span>{time}</span>;
-	}
+function Clock ({ time }) {
+	return <span>{time}</span>;
 }
-const clockEl = registerElement(Clock, 'x-clock', ['time']);
 
-it('renders ok, updates on attr change', function() {
+registerElement(Clock, 'x-clock', ['time']);
+
+it('renders ok, updates on attr change', () => {
 	const root = document.createElement('div');
 	const el = document.createElement('x-clock');
 	el.setAttribute('time', '10:28:57 PM');

@@ -1,0 +1,32 @@
+name: CI
+on:
+  push:
+    branches:
+      - master
+  pull_request:
+    types: [opened, synchronize, reopened, ready_for_review]
+
+jobs:
+  test:
+    runs-on: ubuntu-latest
+    steps:
+    - uses: actions/checkout@v1
+    - uses: actions/setup-node@v1
+      with:
+        node-version: '12.x'
+    - name: npm install, build, and test
+      run: npm ci
+    - name: build
+      run: npm run prepare
+      env:
+        CI: true
+    - name: build
+      run: npm test
+      env:
+        CI: true
+    - name: saucelabs
+      run: npm run test:browser
+      env:
+        CI: true
+        SAUCE_USERNAME: ${{ secrets.SAUCE_USERNAME }}
+        SAUCE_ACCESS_KEY: ${{ secrets.SAUCE_ACCESS_KEY }}
