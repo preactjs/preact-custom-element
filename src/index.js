@@ -25,6 +25,7 @@ function connectedCallback() {
 }
 
 function attributeChangedCallback(name, oldValue, newValue) {
+	if (!this._vdom) return;
 	const props = {};
 	props[name] = newValue;
 	this._vdom = cloneElement(this._vdom, props);
