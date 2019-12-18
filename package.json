@@ -2,17 +2,20 @@
   "name": "preact-custom-element",
   "version": "3.0.0",
   "description": "Wrap your component up as a custom element",
-  "main": "dist/bundle.js",
-  "jsnext:main": "src/index.js",
+  "main": "dist/preact-custom-element.js",
+  "module": "dist/preact-custom-element.esm.js",
+  "unpkg": "dist/preact-custom-element.umd.js",
+  "source": "src/index.js",
   "scripts": {
-    "prepare": "cross-env NODE_ENV=production webpack -p",
-    "test": "karma start",
+    "prepare": "microbundle",
+    "test": "karmatic",
+    "test:browser": "MOZ_HEADLESS=1 karmatic --no-coverage --browsers chrome:headless,firefox,sauce-safari",
     "prettier": "prettier **/*.js --write"
   },
-  "repository": {
-    "type": "git",
-    "url": "git+https://github.com/bspaulding/preact-custom-element.git"
+  "eslintConfig": {
+    "extends": "developit"
   },
+  "repository": "preactjs/preact-custom-element",
   "keywords": [
     "preact",
     "web",
@@ -20,35 +23,24 @@
     "custom",
     "element"
   ],
-  "author": "Bradley J. Spaulding",
+  "authors": [
+    "Bradley J. Spaulding",
+    "The Preact Authors (https://preactjs.com)"
+  ],
   "license": "MIT",
-  "bugs": {
-    "url": "https://github.com/bspaulding/preact-custom-element/issues"
+  "bugs": "https://github.com/preactjs/preact-custom-element/issues",
+  "homepage": "https://github.com/preactjs/preact-custom-element",
+  "peerDependencies": {
+    "preact": "^10"
   },
-  "homepage": "https://github.com/bspaulding/preact-custom-element#readme",
   "devDependencies": {
-    "@babel/core": "^7.6.4",
-    "@babel/preset-env": "^7.6.3",
-    "@babel/preset-react": "^7.6.3",
-    "babel-loader": "^8.0.6",
-    "babel-plugin-transform-react-jsx": "^6.24.1",
-    "cross-env": "^6.0.3",
-    "dotenv": "^8.2.0",
-    "ip": "^1.1.5",
-    "karma": "^4.4.0",
-    "karma-browserstack-launcher": "^1.5.1",
-    "karma-chrome-launcher": "^3.1.0",
-    "karma-firefox-launcher": "^1.2.0",
-    "karma-ie-launcher": "^1.0.0",
-    "karma-mocha": "^1.3.0",
-    "karma-notify-reporter": "^1.1.0",
-    "karma-opera-launcher": "^1.0.0",
-    "karma-safari-launcher": "^1.0.0",
-    "karma-webpack": "^4.0.2",
-    "mocha": "^6.2.1",
-    "preact": "^10.0.1",
-    "prettier": "^1.18.2",
-    "webpack": "^4.41.2",
-    "webpack-cli": "^3.3.9"
+    "eslint": "^6.7.2",
+    "eslint-config-developit": "^1.1.1",
+    "karmatic": "^1.4.0",
+    "microbundle": "^0.12.0-next.6",
+    "mocha": "^6.2.2",
+    "preact": "^10.1.1",
+    "prettier": "^1.19.1",
+    "webpack": "^4.41.3"
   }
 }
