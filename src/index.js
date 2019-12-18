@@ -1,6 +1,4 @@
-import { h, render } from 'preact';
-
-const Empty = () => null;
+import { h, cloneElement, render } from 'preact';
 
 export default function register(Component, tagName, propNames) {
 	function PreactElement() {
@@ -10,27 +8,35 @@ export default function register(Component, tagName, propNames) {
 	}
 	PreactElement.prototype = Object.create(HTMLElement.prototype);
 	PreactElement.prototype.constructor = PreactElement;
-	PreactElement.prototype.connectedCallback = renderElement;
-	PreactElement.prototype.attributeChangedCallback = renderElement;
-	PreactElement.prototype.detachedCallback = unRenderElement;
-	PreactElement.observedAttributes = propNames;
+	PreactElement.prototype.connectedCallback = connectedCallback;
+	PreactElement.prototype.attributeChangedCallback = attributeChangedCallback;
+	PreactElement.prototype.detachedCallback = detachedCallback;
+	PreactElement.observedAttributes = propNames || Component.observedAttributes || Object.keys(Component.propTypes || {});
 
-	return window.customElements.define(
-		tagName || Component.displayName || Component.name,
+	return customElements.define(
+		tagName || Component.tagName || Component.displayName || Component.name,
 		PreactElement
 	);
 }
 
-function renderElement() {
-	this._root = render(toVdom(this, this._vdomComponent), this, this._root);
+function connectedCallback() {
+	this._vdom = toVdom(this, this._vdomComponent);
+	render(this._vdom, this);
 }
 
-function unRenderElement() {
-	render(h(Empty), this, this._root);
+function attributeChangedCallback(name, oldValue, newValue) {
+	const props = {};
+	props[name] = newValue;
+	this._vdom = cloneElement(this._vdom, props);
+	render(this._vdom, this);
+}
+
+function detachedCallback() {
+	render(this._vdom = null, this);
 }
 
 function toVdom(element, nodeName) {
-	if (element.nodeType === 3) return element.nodeValue;
+	if (element.nodeType === 3) return element.data;
 	if (element.nodeType !== 1) return null;
 	let children = [],
 		props = {},
