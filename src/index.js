@@ -11,7 +11,14 @@ export default function register(Component, tagName, propNames) {
 	PreactElement.prototype.connectedCallback = connectedCallback;
 	PreactElement.prototype.attributeChangedCallback = attributeChangedCallback;
 	PreactElement.prototype.detachedCallback = detachedCallback;
-	PreactElement.observedAttributes = propNames || Component.observedAttributes || Object.keys(Component.propTypes || {});
+	propNames = propNames || Component.observedAttributes || Object.keys(Component.propTypes || {});
+	PreactElement.observedAttributes = propNames;
+	propNames.forEach(name => {
+		Object.defineProperty(PreactElement.prototype, name, {
+			get() { return this._vdom.props[name]; },
+			set(v) { this.attributeChangedCallback(name, null, v); }
+		});
+	})
 
 	return customElements.define(
 		tagName || Component.tagName || Component.displayName || Component.name,
