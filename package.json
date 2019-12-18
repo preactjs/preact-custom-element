@@ -9,7 +9,7 @@
   "scripts": {
     "prepare": "microbundle",
     "test": "karmatic",
-    "test:browser": "karmatic --no-coverage --browsers chrome:headless,firefox,sauce-safari",
+    "test:browser": "MOZ_HEADLESS=1 karmatic --no-coverage --browsers chrome:headless,firefox,sauce-safari",
     "prettier": "prettier **/*.js --write"
   },
   "eslintConfig": {
