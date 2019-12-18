@@ -15,15 +15,15 @@ jobs:
       - uses: actions/setup-node@v1
         with:
           node-version: '12.x'
-    - name: install
-      - run: npm ci
-    - name: build and test
-      - run: npm run prepare
-      - run: npm test
-    - name: cross-browser tests
-      env:
-        CI: true
-        SAUCE_USERNAME: ${{ secrets.SAUCE_USERNAME }}
-        SAUCE_ACCESS_KEY: ${{ secrets.SAUCE_ACCESS_KEY }}
-      run: |
-        npm run test:browser
+      - name: install
+        - run: npm ci
+      - name: build and test
+        - run: npm run prepare
+        - run: npm test
+      - name: cross-browser tests
+        env:
+          CI: true
+          SAUCE_USERNAME: ${{ secrets.SAUCE_USERNAME }}
+          SAUCE_ACCESS_KEY: ${{ secrets.SAUCE_ACCESS_KEY }}
+        run: |
+          npm run test:browser
