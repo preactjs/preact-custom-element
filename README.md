@@ -8,13 +8,13 @@ Previous versions (< 3.0.0) implemented the v0 proposal, which was only implemen
 Import `CustomElement` and call with your component a tag name __\*__, and a list of attribute names you want to observe:
 
 ```javascript
-import registerCustomElement from "preact-custom-element";
+import register from 'preact-custom-element';
 
-const Greeting = ({ name = "World" }) => (
-	<p>Hello, {name}!</p>
+const Greeting = ({ name = 'World' }) => (
+  <p>Hello, {name}!</p>
 );
 
-registerCustomElement(Greeting, "x-greeting", ["name"]);
+register(Greeting, 'x-greeting', ['name']);
 ```
 
 > _**\* Note:** as per the [Custom Elements specification](http://w3c.github.io/webcomponents/spec/custom/#prod-potentialcustomelementname), the tag name must contain a hyphen._
@@ -31,19 +31,45 @@ Output:
 <p>Hello, Billy Jo!</p>
 ```
 
-### Why the prop names parameter?
+### Prop Names and Automatic Prop Names
 
-The Custom Elements V1 spec requires you to explictly state the attribute names you want to observe. From your Preact component perspective, `props` could be an object with any keys at runtime. This unfortunate combination of factors leaves us needing to explicitly state them.
+The Custom Elements V1 specification requires explictly stating the names of any attributes you want to observe. From your Preact component perspective, `props` could be an object with any keys at runtime, so it's not always clear which props should be accepted as attributes.
 
-It's possible that a compile step could introspect your usages of props and generate the glue code here. Please send me a link if you do this!
+If you omit the third parameter to `register()`, the list of attributes to observe can be specified using a static `observedAttributes` property on your Component. This also works for the Custom Element's name, which can be specified using a `tagName` static property:
+
+```js
+import register from 'preact-custom-element';
+
+// <x-greeting name="Bo"></x-greeting>
+class Greeting extends Component {
+  // Register as <x-greeting>:
+  static tagName = 'x-greeting';
+
+  // Track these attributes:
+  static observedAttributes = ['name'];
+
+  render({ name }) {
+    return <p>Hello, {name}!</p>;
+  }
+}
+register(Greeting);
+```
+
+If no `observedAttributes` are specified, they will be inferred from the keys of `propTypes` if present on the Component:
+
+```js
+// Other option: use PropTypes:
+function FullName(props) {
+  return <span>{props.first} {props.last}</span>
+}
+FullName.propTypes = {
+  first: Object,   // you can use PropTypes, or this
+  last: Object     // trick to define untyped props.
+};
+register(FullName, 'full-name');
+```
+
 
 ## Related
 
 [preact-shadow-dom](https://github.com/bspaulding/preact-shadow-dom)
-
-## Thanks
-
-Big thanks to BrowserStack for providing service for CI on this project! BrowserStack allows us to test this project on all real browsers that support Custom Elements, including mobile browsers.
-
-<a href="https://www.browserstack.com" target="_blank" rel="noopener noreferrer"><img src="https://p14.zdusercontent.com/attachment/1015988/9muQl92dJ9ShKIGmIt7iaICUb?token=eyJhbGciOiJkaXIiLCJlbmMiOiJBMTI4Q0JDLUhTMjU2In0..W4aqOGR0iTl_Rh1nskJGRQ.gLdLdkMD8vfZdJ7eqZpU6lmB-yGQv2hCYRJeBQ91WtaJzpYMQQUEWNE0oK3xLjBKYPKWA9D1UlA-beeUwlczRKVF8ZoG8OMDg6K3vVIIFKH3an8QfcH0iFQXhH4m6cmXqoPAcqDXvrpv3DUXIQaxD8bXykKFpBR5gEk6m3VsH8geK4UxzQ3ORYCOv4XD8EPm-Ap0lZwVZaGMHAncCP9dlOVhZjVVDKwBI5cwFOa_jSwtsCbgW3EX901k-nu1w6IlgFvWh8mxMaM4DMtVtCGfnuNspN7qYXJRTgMEVPVIk8o.bKvlbSGn8PntRSHO7sgBSA" height="150"/>
-</a>
