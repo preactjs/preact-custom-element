@@ -1,4 +1,4 @@
-import { h, cloneElement, render } from 'preact';
+import { h, cloneElement, render, hydrate } from 'preact';
 
 export default function register(Component, tagName, propNames) {
 	function PreactElement() {
@@ -21,7 +21,7 @@ export default function register(Component, tagName, propNames) {
 
 function connectedCallback() {
 	this._vdom = toVdom(this, this._vdomComponent);
-	render(this._vdom, this);
+	(this.hasAttribute('hydrate') ? hydrate : render)(this._vdom, this);
 }
 
 function attributeChangedCallback(name, oldValue, newValue) {
