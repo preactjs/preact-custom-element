@@ -1,9 +1,10 @@
 import { h, cloneElement, render, hydrate } from 'preact';
 
-export default function register(Component, tagName, propNames) {
+export default function register(Component, tagName, propNames, options) {
 	function PreactElement() {
 		const inst = Reflect.construct(HTMLElement, [], PreactElement);
 		inst._vdomComponent = Component;
+		inst._root = options && options.shadow ? inst.attachShadow({ mode: 'open' }) : inst;
 		return inst;
 	}
 	PreactElement.prototype = Object.create(HTMLElement.prototype);
@@ -21,7 +22,7 @@ export default function register(Component, tagName, propNames) {
 
 function connectedCallback() {
 	this._vdom = toVdom(this, this._vdomComponent);
-	(this.hasAttribute('hydrate') ? hydrate : render)(this._vdom, this);
+	(this.hasAttribute('hydrate') ? hydrate : render)(this._vdom, this._root);
 }
 
 function attributeChangedCallback(name, oldValue, newValue) {
@@ -29,11 +30,11 @@ function attributeChangedCallback(name, oldValue, newValue) {
 	const props = {};
 	props[name] = newValue;
 	this._vdom = cloneElement(this._vdom, props);
-	render(this._vdom, this);
+	render(this._vdom, this._root);
 }
 
 function detachedCallback() {
-	render(this._vdom = null, this);
+	render(this._vdom = null, this._root);
 }
 
 function toVdom(element, nodeName) {
