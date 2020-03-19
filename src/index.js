@@ -25,10 +25,17 @@ function connectedCallback() {
 	(this.hasAttribute('hydrate') ? hydrate : render)(this._vdom, this._root);
 }
 
+function toCamelCase(str) {
+	return str.replace(/-(\w)/g, function(_, c) {
+		return c ? c.toUpperCase() : ''
+	});
+}
+
 function attributeChangedCallback(name, oldValue, newValue) {
 	if (!this._vdom) return;
 	const props = {};
 	props[name] = newValue;
+	props[toCamelCase(name)] = newValue;
 	this._vdom = cloneElement(this._vdom, props);
 	render(this._vdom, this._root);
 }
@@ -46,10 +53,8 @@ function toVdom(element, nodeName) {
 		a = element.attributes,
 		cn = element.childNodes;
 	for (i = a.length; i--; ) {
-	  var propName = a[i].name.replace(/-(\w)/, function(_, c) {
-	    return c ? c.toUpperCase() : ''
-	  });
-	  props[propName] = a[i].value;
+	  props[a[i].name] = a[i].value;
+	  props[toCamelCase(a[i].name)] = a[i].value;
   }
 	for (i = cn.length; i--; ) children[i] = toVdom(cn[i]);
 	return h(nodeName || element.nodeName.toLowerCase(), props, children);
