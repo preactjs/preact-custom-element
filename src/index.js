@@ -53,9 +53,21 @@ function toVdom(element, nodeName) {
 		a = element.attributes,
 		cn = element.childNodes;
 	for (i = a.length; i--; ) {
-	  props[a[i].name] = a[i].value;
-	  props[toCamelCase(a[i].name)] = a[i].value;
-  }
-	for (i = cn.length; i--; ) children[i] = toVdom(cn[i]);
+		if (a[i].name !== 'slot') {
+			props[a[i].name] = a[i].value;
+			props[toCamelCase(a[i].name)] = a[i].value;
+		}
+	}
+
+	for (i = cn.length; i--; ) {
+		const vnode = toVdom(cn[i]);
+		// Move slots correctly
+		const name = cn[i].slot;
+		if (name) {
+			props[name] = h('slot', { name }, vnode);
+		} else {
+			children[i] = vnode;
+		}
+	}
 	return h(nodeName || element.nodeName.toLowerCase(), props, children);
 }
