@@ -11,7 +11,7 @@ export default function register(Component, tagName, propNames, options) {
 	PreactElement.prototype.constructor = PreactElement;
 	PreactElement.prototype.connectedCallback = connectedCallback;
 	PreactElement.prototype.attributeChangedCallback = attributeChangedCallback;
-	PreactElement.prototype.detachedCallback = detachedCallback;
+	PreactElement.prototype.disconnectedCallback = disconnectedCallback;
 	PreactElement.observedAttributes = propNames || Component.observedAttributes || Object.keys(Component.propTypes || {});
 
 	return customElements.define(
@@ -40,7 +40,7 @@ function attributeChangedCallback(name, oldValue, newValue) {
 	render(this._vdom, this._root);
 }
 
-function detachedCallback() {
+function disconnectedCallback() {
 	render(this._vdom = null, this._root);
 }
 
