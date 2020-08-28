@@ -1,5 +1,6 @@
 import { assert } from '@open-wc/testing';
-import { h } from 'preact';
+import { h, createContext } from 'preact';
+import { useContext } from 'preact/hooks';
 import registerElement from './index';
 
 function Clock({ time }) {
@@ -110,6 +111,48 @@ it('handles kebab-case attributes with passthrough', () => {
 		root.innerHTML,
 		`<x-prop-name-transform ${kebabName}="01/01/2001" ${lowerName}="pretended to be camel"><span>01/01/2001 pretended to be camel 01/01/2001</span></x-prop-name-transform>`
 	);
+
+	document.body.removeChild(root);
+});
+
+const Theme = createContext('light');
+
+function DisplayTheme() {
+	const theme = useContext(Theme);
+	return <p>Active theme: {theme}</p>;
+}
+
+registerElement(DisplayTheme, 'x-display-theme', [], { shadow: true });
+
+function Parent({ children }) {
+	return (
+		<Theme.Provider value="dark">
+			<div class="children">{children}</div>
+		</Theme.Provider>
+	);
+}
+
+registerElement(Parent, 'x-parent', [], { shadow: true });
+
+it('passes down information using context over custom element boundaries', () => {
+	const root = document.createElement('div');
+	const el = document.createElement('x-parent');
+
+	const noSlot = document.createElement('x-display-theme');
+	el.appendChild(noSlot);
+
+	root.appendChild(el);
+	document.body.appendChild(root);
+
+	assert.equal(
+		root.innerHTML,
+		'<x-parent><x-display-theme></x-display-theme></x-parent>'
+	);
+
+	const shadowHTML = document.querySelector('x-display-theme').shadowRoot
+		.innerHTML;
+
+	assert.equal(shadowHTML, '<p>Active theme: dark</p>');
 
 	document.body.removeChild(root);
 });
