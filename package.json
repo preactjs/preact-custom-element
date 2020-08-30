@@ -17,7 +17,7 @@
 	"eslintConfig": {
 		"extends": "developit",
 		"rules": {
-			"brace-sstyle": "off",
+			"brace-style": "off",
 			"jest/expect-expect": "off",
 			"comma-dangle": "off",
 			"no-unused-vars": [
