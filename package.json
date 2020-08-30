@@ -16,6 +16,11 @@
 	},
 	"eslintConfig": {
 		"extends": "developit",
+		"settings": {
+			"react": {
+				"version": "latest"
+			}
+		},
 		"rules": {
 			"brace-style": "off",
 			"jest/expect-expect": "off",
