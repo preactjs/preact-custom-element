@@ -13,7 +13,16 @@
     "prettier": "prettier **/*.js --write"
   },
   "eslintConfig": {
-    "extends": "developit"
+    "extends": "developit",
+    "rules": {
+      "no-unused-vars": [
+        2,
+        {
+          "args": "none",
+          "varsIgnorePattern": "^h$"
+        }
+      ]
+    }
   },
   "repository": "preactjs/preact-custom-element",
   "keywords": [
