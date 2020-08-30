@@ -45,7 +45,7 @@
 	"bugs": "https://github.com/preactjs/preact-custom-element/issues",
 	"homepage": "https://github.com/preactjs/preact-custom-element",
 	"peerDependencies": {
-		"preact": "^10"
+		"preact": "10.x"
 	},
 	"devDependencies": {
 		"@open-wc/testing": "^2.5.25",
