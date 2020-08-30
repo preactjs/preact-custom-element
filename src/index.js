@@ -4,7 +4,8 @@ export default function register(Component, tagName, propNames, options) {
 	function PreactElement() {
 		const inst = Reflect.construct(HTMLElement, [], PreactElement);
 		inst._vdomComponent = Component;
-		inst._root = options && options.shadow ? inst.attachShadow({ mode: 'open' }) : inst;
+		inst._root =
+			options && options.shadow ? inst.attachShadow({ mode: 'open' }) : inst;
 		return inst;
 	}
 	PreactElement.prototype = Object.create(HTMLElement.prototype);
@@ -12,7 +13,10 @@ export default function register(Component, tagName, propNames, options) {
 	PreactElement.prototype.connectedCallback = connectedCallback;
 	PreactElement.prototype.attributeChangedCallback = attributeChangedCallback;
 	PreactElement.prototype.disconnectedCallback = disconnectedCallback;
-	PreactElement.observedAttributes = propNames || Component.observedAttributes || Object.keys(Component.propTypes || {});
+	PreactElement.observedAttributes =
+		propNames ||
+		Component.observedAttributes ||
+		Object.keys(Component.propTypes || {});
 
 	return customElements.define(
 		tagName || Component.tagName || Component.displayName || Component.name,
@@ -26,9 +30,7 @@ function connectedCallback() {
 }
 
 function toCamelCase(str) {
-	return str.replace(/-(\w)/g, function(_, c) {
-		return c ? c.toUpperCase() : ''
-	});
+	return str.replace(/-(\w)/g, (_, c) => (c ? c.toUpperCase() : ''));
 }
 
 function attributeChangedCallback(name, oldValue, newValue) {
@@ -41,7 +43,7 @@ function attributeChangedCallback(name, oldValue, newValue) {
 }
 
 function disconnectedCallback() {
-	render(this._vdom = null, this._root);
+	render((this._vdom = null), this._root);
 }
 
 function toVdom(element, nodeName) {
