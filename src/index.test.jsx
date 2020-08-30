@@ -1,8 +1,8 @@
-import assert from 'assert';
+import { assert } from '@open-wc/testing';
 import { h } from 'preact';
 import registerElement from './index';
 
-function Clock ({ time }) {
+function Clock({ time }) {
 	return <span>{time}</span>;
 }
 
@@ -61,10 +61,16 @@ it('renders slots as props with shadow DOM', () => {
 	root.appendChild(el);
 	document.body.appendChild(root);
 
-	assert.equal(root.innerHTML, '<x-foo><div>no slot</div><span slot="text">here is a slot</span></x-foo>');
+	assert.equal(
+		root.innerHTML,
+		'<x-foo><div>no slot</div><span slot="text">here is a slot</span></x-foo>'
+	);
 
 	const shadowHTML = document.querySelector('x-foo').shadowRoot.innerHTML;
-	assert.equal(shadowHTML, '<span class="wrapper"><div class="children"><div>no slot</div></div><div class="slotted"><slot name="text"><span>here is a slot</span></slot></div></span>');
+	assert.equal(
+		shadowHTML,
+		'<span class="wrapper"><div class="children"><div>no slot</div></div><div class="slotted"><slot name="text"><span>here is a slot</span></slot></div></span>'
+	);
 
 	document.body.removeChild(root);
 });
@@ -72,10 +78,17 @@ it('renders slots as props with shadow DOM', () => {
 const kebabName = 'custom-date-long-name';
 const camelName = 'customDateLongName';
 const lowerName = camelName.toLowerCase();
-function PropNameTransform (props) {
-	return <span>{props[kebabName]} {props[lowerName]} {props[camelName]}</span>;
+function PropNameTransform(props) {
+	return (
+		<span>
+			{props[kebabName]} {props[lowerName]} {props[camelName]}
+		</span>
+	);
 }
-registerElement(PropNameTransform , 'x-prop-name-transform', [kebabName, camelName]);
+registerElement(PropNameTransform, 'x-prop-name-transform', [
+	kebabName,
+	camelName,
+]);
 
 it('handles kebab-case attributes with passthrough', () => {
 	const root = document.createElement('div');
