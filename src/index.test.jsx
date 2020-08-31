@@ -1,6 +1,7 @@
 import { assert } from '@open-wc/testing';
 import { h, createContext } from 'preact';
 import { useContext } from 'preact/hooks';
+import { act } from 'preact/test-utils';
 import registerElement from './index';
 
 function Clock({ time }) {
@@ -70,7 +71,7 @@ it('renders slots as props with shadow DOM', () => {
 	const shadowHTML = document.querySelector('x-foo').shadowRoot.innerHTML;
 	assert.equal(
 		shadowHTML,
-		'<span class="wrapper"><div class="children"><div>no slot</div></div><div class="slotted"><slot name="text"><span>here is a slot</span></slot></div></span>'
+		'<span class="wrapper"><div class="children"><slot><div>no slot</div></slot></div><div class="slotted"><slot name="text"><span>here is a slot</span></slot></div></span>'
 	);
 
 	document.body.removeChild(root);
@@ -124,17 +125,17 @@ function DisplayTheme() {
 
 registerElement(DisplayTheme, 'x-display-theme', [], { shadow: true });
 
-function Parent({ children }) {
+function Parent({ children, theme = 'dark' }) {
 	return (
-		<Theme.Provider value="dark">
+		<Theme.Provider value={theme}>
 			<div class="children">{children}</div>
 		</Theme.Provider>
 	);
 }
 
-registerElement(Parent, 'x-parent', [], { shadow: true });
+registerElement(Parent, 'x-parent', ['theme'], { shadow: true });
 
-it('passes down information using context over custom element boundaries', () => {
+it('passes context over custom element boundaries', async () => {
 	const root = document.createElement('div');
 	const el = document.createElement('x-parent');
 
@@ -149,10 +150,15 @@ it('passes down information using context over custom element boundaries', () =>
 		'<x-parent><x-display-theme></x-display-theme></x-parent>'
 	);
 
-	const shadowHTML = document.querySelector('x-display-theme').shadowRoot
-		.innerHTML;
+	const getShadowHTML = () =>
+		document.querySelector('x-display-theme').shadowRoot.innerHTML;
+	assert.equal(getShadowHTML(), '<p>Active theme: dark</p>');
 
-	assert.equal(shadowHTML, '<p>Active theme: dark</p>');
+	// Trigger context update
+	act(() => {
+		el.setAttribute('theme', 'sunny');
+	});
+	assert.equal(getShadowHTML(), '<p>Active theme: sunny</p>');
 
 	document.body.removeChild(root);
 });
