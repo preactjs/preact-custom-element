@@ -1,46 +1,80 @@
 {
-  "name": "preact-custom-element",
-  "version": "4.1.0",
-  "description": "Wrap your component up as a custom element",
-  "main": "dist/preact-custom-element.js",
-  "module": "dist/preact-custom-element.esm.js",
-  "unpkg": "dist/preact-custom-element.umd.js",
-  "source": "src/index.js",
-  "scripts": {
-    "prepare": "microbundle",
-    "test": "karmatic",
-    "test:browser": "MOZ_HEADLESS=1 karmatic --no-coverage --browsers chrome:headless,firefox,sauce-safari",
-    "prettier": "prettier **/*.js --write"
-  },
-  "eslintConfig": {
-    "extends": "developit"
-  },
-  "repository": "preactjs/preact-custom-element",
-  "keywords": [
-    "preact",
-    "web",
-    "components",
-    "custom",
-    "element"
-  ],
-  "authors": [
-    "Bradley J. Spaulding",
-    "The Preact Authors (https://preactjs.com)"
-  ],
-  "license": "MIT",
-  "bugs": "https://github.com/preactjs/preact-custom-element/issues",
-  "homepage": "https://github.com/preactjs/preact-custom-element",
-  "peerDependencies": {
-    "preact": "^10"
-  },
-  "devDependencies": {
-    "eslint": "^6.7.2",
-    "eslint-config-developit": "^1.1.1",
-    "karmatic": "^1.4.0",
-    "microbundle": "^0.12.0-next.6",
-    "mocha": "^6.2.2",
-    "preact": "^10.1.1",
-    "prettier": "^1.19.1",
-    "webpack": "^4.41.3"
-  }
+	"name": "preact-custom-element",
+	"version": "4.1.0",
+	"description": "Wrap your component up as a custom element",
+	"main": "dist/preact-custom-element.js",
+	"module": "dist/preact-custom-element.esm.js",
+	"unpkg": "dist/preact-custom-element.umd.js",
+	"source": "src/index.js",
+	"scripts": {
+		"prepare": "microbundle",
+		"lint": "eslint src/*.{js,jsx}",
+		"test": "wtr src/*.test.{js,jsx}",
+		"test:browsers": "wtr src/*.test.{js,jsx} --playwright --browsers chromium firefox webkit",
+		"prettier": "prettier **/*.{js,jsx} --write",
+		"prepublishOnly": "npm run lint && npm run test"
+	},
+	"eslintConfig": {
+		"extends": "developit",
+		"settings": {
+			"react": {
+				"version": "latest"
+			}
+		},
+		"rules": {
+			"brace-style": "off",
+			"jest/expect-expect": "off",
+			"comma-dangle": "off",
+			"no-unused-vars": [
+				2,
+				{
+					"args": "none",
+					"varsIgnorePattern": "^h$"
+				}
+			]
+		}
+	},
+	"repository": "preactjs/preact-custom-element",
+	"keywords": [
+		"preact",
+		"web",
+		"components",
+		"custom",
+		"element"
+	],
+	"authors": [
+		"Bradley J. Spaulding",
+		"The Preact Authors (https://preactjs.com)"
+	],
+	"license": "MIT",
+	"bugs": "https://github.com/preactjs/preact-custom-element/issues",
+	"homepage": "https://github.com/preactjs/preact-custom-element",
+	"peerDependencies": {
+		"preact": "10.x"
+	},
+	"devDependencies": {
+		"@open-wc/testing": "^2.5.25",
+		"@web/dev-server-core": "^0.2.4",
+		"@web/dev-server-esbuild": "^0.2.2",
+		"@web/test-runner": "^0.7.12",
+		"@web/test-runner-playwright": "^0.5.4",
+		"eslint": "^7.7.0",
+		"eslint-config-developit": "^1.2.0",
+		"get-stream": "^6.0.0",
+		"husky": "^4.2.5",
+		"lint-staged": "^10.2.13",
+		"microbundle": "^0.12.3",
+		"preact": "^10.4.8",
+		"prettier": "^2.1.1"
+	},
+	"lint-staged": {
+		"**/*.{js,jsx,ts,tsx,yml}": [
+			"prettier --write"
+		]
+	},
+	"husky": {
+		"hooks": {
+			"pre-commit": "lint-staged"
+		}
+	}
 }
