@@ -33,6 +33,93 @@ it('renders ok, updates on attr change', () => {
 	document.body.removeChild(root);
 });
 
+it('passes property changes to props', () => {
+	const root = document.createElement('div');
+	const el = document.createElement('x-clock');
+
+	el.time = '10:28:57 PM';
+	assert.equal(el.time, '10:28:57 PM');
+
+	root.appendChild(el);
+	document.body.appendChild(root);
+	assert.equal(
+		root.innerHTML,
+		'<x-clock time="10:28:57 PM"><span>10:28:57 PM</span></x-clock>'
+	);
+
+	el.time = '11:01:10 AM';
+	assert.equal(el.time, '11:01:10 AM');
+
+	assert.equal(
+		root.innerHTML,
+		'<x-clock time="11:01:10 AM"><span>11:01:10 AM</span></x-clock>'
+	);
+
+	document.body.removeChild(root);
+});
+
+function DummyButton({ onClick, text = 'click' }) {
+	return <button onClick={onClick}>{text}</button>;
+}
+
+registerElement(DummyButton, 'x-dummy-button', ['onClick', 'text']);
+
+it('passes simple properties changes to props', () => {
+	const root = document.createElement('div');
+	const el = document.createElement('x-dummy-button');
+
+	el.text = 'foo';
+	assert.equal(el.text, 'foo');
+
+	root.appendChild(el);
+	document.body.appendChild(root);
+	assert.equal(
+		root.innerHTML,
+		'<x-dummy-button text="foo"><button>foo</button></x-dummy-button>'
+	);
+
+	// Update
+	el.text = 'bar';
+	assert.equal(
+		root.innerHTML,
+		'<x-dummy-button text="bar"><button>bar</button></x-dummy-button>'
+	);
+
+	document.body.removeChild(root);
+});
+
+it('passes complex properties changes to props', () => {
+	const root = document.createElement('div');
+	const el = document.createElement('x-dummy-button');
+
+	let clicks = 0;
+	const onClick = () => clicks++;
+	el.onClick = onClick;
+	assert.equal(el.onClick, onClick);
+
+	root.appendChild(el);
+	document.body.appendChild(root);
+	assert.equal(
+		root.innerHTML,
+		'<x-dummy-button><button>click</button></x-dummy-button>'
+	);
+
+	act(() => {
+		el.querySelector('button').click();
+	});
+	assert.equal(clicks, 1);
+
+	// Update
+	let other = 0;
+	el.onClick = () => other++;
+	act(() => {
+		el.querySelector('button').click();
+	});
+	assert.equal(other, 1);
+
+	document.body.removeChild(root);
+});
+
 function Foo({ text, children }) {
 	return (
 		<span class="wrapper">
