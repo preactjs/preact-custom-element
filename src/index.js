@@ -79,7 +79,7 @@ function connectedCallback() {
 	this._vdom = h(
 		ContextProvider,
 		{ ...this._props, context },
-		toVdom(this, true, this._vdomComponent)
+		toVdom(this, this._vdomComponent)
 	);
 	(this.hasAttribute('hydrate') ? hydrate : render)(this._vdom, this._root);
 }
@@ -126,7 +126,7 @@ function Slot(props, context) {
 	return h('slot', { ...props, ref });
 }
 
-function toVdom(element, wrap, nodeName) {
+function toVdom(element, nodeName) {
 	if (element.nodeType === 3) return element.data;
 	if (element.nodeType !== 1) return null;
 	let children = [],
@@ -142,7 +142,7 @@ function toVdom(element, wrap, nodeName) {
 	}
 
 	for (i = cn.length; i--; ) {
-		const vnode = toVdom(cn[i], false);
+		const vnode = toVdom(cn[i], null);
 		// Move slots correctly
 		const name = cn[i].slot;
 		if (name) {
@@ -153,6 +153,6 @@ function toVdom(element, wrap, nodeName) {
 	}
 
 	// Only wrap the topmost node with a slot
-	const wrappedChildren = wrap ? h(Slot, null, children) : children;
+	const wrappedChildren = nodeName ? h(Slot, null, children) : children;
 	return h(nodeName || element.nodeName.toLowerCase(), props, wrappedChildren);
 }
