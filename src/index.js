@@ -13,10 +13,41 @@ export default function register(Component, tagName, propNames, options) {
 	PreactElement.prototype.connectedCallback = connectedCallback;
 	PreactElement.prototype.attributeChangedCallback = attributeChangedCallback;
 	PreactElement.prototype.disconnectedCallback = disconnectedCallback;
-	PreactElement.observedAttributes =
+
+	propNames =
 		propNames ||
 		Component.observedAttributes ||
 		Object.keys(Component.propTypes || {});
+	PreactElement.observedAttributes = propNames;
+
+	// Keep DOM properties and Preact props in sync
+	propNames.forEach((name) => {
+		Object.defineProperty(PreactElement.prototype, name, {
+			get() {
+				return this._vdom.props[name];
+			},
+			set(v) {
+				if (this._vdom) {
+					this.attributeChangedCallback(name, null, v);
+				} else {
+					if (!this._props) this._props = {};
+					this._props[name] = v;
+					this.connectedCallback();
+				}
+
+				// Reflect property changes to attributes if the value is a primitive
+				const type = typeof v;
+				if (
+					v == null ||
+					type === 'string' ||
+					type === 'boolean' ||
+					type === 'number'
+				) {
+					this.setAttribute(name, v);
+				}
+			},
+		});
+	});
 
 	return customElements.define(
 		tagName || Component.tagName || Component.displayName || Component.name,
@@ -47,7 +78,7 @@ function connectedCallback() {
 
 	this._vdom = h(
 		ContextProvider,
-		{ context },
+		{ ...this._props, context },
 		toVdom(this, true, this._vdomComponent)
 	);
 	(this.hasAttribute('hydrate') ? hydrate : render)(this._vdom, this._root);
