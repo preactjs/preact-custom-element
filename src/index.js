@@ -24,8 +24,32 @@ export default function register(Component, tagName, propNames, options) {
 	);
 }
 
+function ContextProvider(props) {
+	this.getChildContext = () => props.context;
+	// eslint-disable-next-line no-unused-vars
+	const { context, children, ...rest } = props;
+	return cloneElement(children, rest);
+}
+
 function connectedCallback() {
-	this._vdom = toVdom(this, this._vdomComponent);
+	// Obtain a reference to the previous context by pinging the nearest
+	// higher up node that was rendered with Preact. If one Preact component
+	// higher up receives our ping, it will set the `detail` property of
+	// our custom event. This works because events are dispatched
+	// synchronously.
+	const event = new CustomEvent('_preact', {
+		detail: {},
+		bubbles: true,
+		cancelable: true,
+	});
+	this.dispatchEvent(event);
+	const context = event.detail.context;
+
+	this._vdom = h(
+		ContextProvider,
+		{ context },
+		toVdom(this, true, this._vdomComponent)
+	);
 	(this.hasAttribute('hydrate') ? hydrate : render)(this._vdom, this._root);
 }
 
@@ -46,7 +70,32 @@ function disconnectedCallback() {
 	render((this._vdom = null), this._root);
 }
 
-function toVdom(element, nodeName) {
+/**
+ * Pass an event listener to each `<slot>` that "forwards" the current
+ * context value to the rendered child. The child will trigger a custom
+ * event, where will add the context value to. Because events work
+ * synchronously, the child can immediately pull of the value right
+ * after having fired the event.
+ */
+function Slot(props, context) {
+	const ref = (r) => {
+		if (!r) {
+			this.ref.removeEventListener('_preact', this._listener);
+		} else {
+			this.ref = r;
+			if (!this._listener) {
+				this._listener = (event) => {
+					event.stopPropagation();
+					event.detail.context = context;
+				};
+				r.addEventListener('_preact', this._listener);
+			}
+		}
+	};
+	return h('slot', { ...props, ref });
+}
+
+function toVdom(element, wrap, nodeName) {
 	if (element.nodeType === 3) return element.data;
 	if (element.nodeType !== 1) return null;
 	let children = [],
@@ -62,14 +111,17 @@ function toVdom(element, nodeName) {
 	}
 
 	for (i = cn.length; i--; ) {
-		const vnode = toVdom(cn[i]);
+		const vnode = toVdom(cn[i], false);
 		// Move slots correctly
 		const name = cn[i].slot;
 		if (name) {
-			props[name] = h('slot', { name }, vnode);
+			props[name] = h(Slot, { name }, vnode);
 		} else {
 			children[i] = vnode;
 		}
 	}
-	return h(nodeName || element.nodeName.toLowerCase(), props, children);
+
+	// Only wrap the topmost node with a slot
+	const wrappedChildren = wrap ? h(Slot, null, children) : children;
+	return h(nodeName || element.nodeName.toLowerCase(), props, wrappedChildren);
 }

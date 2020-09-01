@@ -1,5 +1,7 @@
 import { assert } from '@open-wc/testing';
-import { h } from 'preact';
+import { h, createContext } from 'preact';
+import { useContext } from 'preact/hooks';
+import { act } from 'preact/test-utils';
 import registerElement from './index';
 
 function Clock({ time }) {
@@ -69,7 +71,7 @@ it('renders slots as props with shadow DOM', () => {
 	const shadowHTML = document.querySelector('x-foo').shadowRoot.innerHTML;
 	assert.equal(
 		shadowHTML,
-		'<span class="wrapper"><div class="children"><div>no slot</div></div><div class="slotted"><slot name="text"><span>here is a slot</span></slot></div></span>'
+		'<span class="wrapper"><div class="children"><slot><div>no slot</div></slot></div><div class="slotted"><slot name="text"><span>here is a slot</span></slot></div></span>'
 	);
 
 	document.body.removeChild(root);
@@ -110,6 +112,53 @@ it('handles kebab-case attributes with passthrough', () => {
 		root.innerHTML,
 		`<x-prop-name-transform ${kebabName}="01/01/2001" ${lowerName}="pretended to be camel"><span>01/01/2001 pretended to be camel 01/01/2001</span></x-prop-name-transform>`
 	);
+
+	document.body.removeChild(root);
+});
+
+const Theme = createContext('light');
+
+function DisplayTheme() {
+	const theme = useContext(Theme);
+	return <p>Active theme: {theme}</p>;
+}
+
+registerElement(DisplayTheme, 'x-display-theme', [], { shadow: true });
+
+function Parent({ children, theme = 'dark' }) {
+	return (
+		<Theme.Provider value={theme}>
+			<div class="children">{children}</div>
+		</Theme.Provider>
+	);
+}
+
+registerElement(Parent, 'x-parent', ['theme'], { shadow: true });
+
+it('passes context over custom element boundaries', async () => {
+	const root = document.createElement('div');
+	const el = document.createElement('x-parent');
+
+	const noSlot = document.createElement('x-display-theme');
+	el.appendChild(noSlot);
+
+	root.appendChild(el);
+	document.body.appendChild(root);
+
+	assert.equal(
+		root.innerHTML,
+		'<x-parent><x-display-theme></x-display-theme></x-parent>'
+	);
+
+	const getShadowHTML = () =>
+		document.querySelector('x-display-theme').shadowRoot.innerHTML;
+	assert.equal(getShadowHTML(), '<p>Active theme: dark</p>');
+
+	// Trigger context update
+	act(() => {
+		el.setAttribute('theme', 'sunny');
+	});
+	assert.equal(getShadowHTML(), '<p>Active theme: sunny</p>');
 
 	document.body.removeChild(root);
 });
