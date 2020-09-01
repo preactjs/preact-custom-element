@@ -230,4 +230,163 @@ describe('web components', () => {
 		});
 		assert.equal(getShadowHTML(), '<p>Active theme: sunny</p>');
 	});
+
+	function Thing() {
+		return <span>Hello world!</span>;
+	}
+
+	const styleElem = document.createElement('style');
+	styleElem.innerHTML = 'span { color: red; }';
+	document.head.appendChild(styleElem);
+
+	registerElement(Thing, 'x-thing', undefined, {
+		shadow: true,
+		injectGlobalStyles: true,
+	});
+
+	describe('Global style injections from document.head', () => {
+		it('injects style-tags', () => {
+			const el = document.createElement('x-thing');
+
+			root.appendChild(el);
+
+			assert.equal(
+				document.querySelector('x-thing').shadowRoot.innerHTML,
+				'<span>Hello world!</span><style>span { color: red; }</style>'
+			);
+
+			const computedStyle = window
+				.getComputedStyle(
+					document.querySelector('x-thing').shadowRoot.querySelector('span'),
+					null
+				)
+				.getPropertyValue('color');
+
+			assert.equal(computedStyle, 'rgb(255, 0, 0)');
+
+			// assert.equal(
+			// 	root.innerHTML,
+			// 	'<x-thing><span>Hello world!</span></x-thing>'
+			// );
+			styleElem.parentElement.removeChild(styleElem);
+		});
+
+		it('injects link-tags of rel="stylesheet"', async () => {
+			const blob = new Blob([], { type: 'text/css' });
+
+			let linkElementLoaded;
+
+			let deferred;
+			let promise = new Promise((resolve) => {
+				deferred = resolve;
+			});
+
+			const linkElem = document.createElement('link');
+			linkElem.rel = 'stylesheet';
+			linkElem.href = window.URL.createObjectURL(blob);
+			linkElem.onload = () => {
+				linkElementLoaded = true;
+				deferred();
+			};
+
+			document.head.appendChild(linkElem);
+
+			const el = document.createElement('x-thing');
+
+			root.appendChild(el);
+
+			assert.match(
+				document.querySelector('x-thing').shadowRoot.innerHTML,
+				new RegExp(
+					`<span>Hello world!</span><link rel="stylesheet" href="blob:http://.*?/[a-fA-F0-9]{8}-[a-fA-F0-9]{4}-[a-fA-F0-9]{4}-[a-fA-F0-9]{4}-[a-fA-F0-9]{12}">`
+				)
+			);
+
+			await promise;
+			assert.isTrue(linkElementLoaded);
+
+			linkElem.parentElement.removeChild(linkElem);
+		});
+
+		it('injects link-tags of rel="preload"', async () => {
+			const blob = new Blob([], { type: 'text/css' });
+
+			let linkElementLoaded;
+
+			let deferred;
+			let promise = new Promise((resolve) => {
+				deferred = resolve;
+			});
+
+			const linkElem = document.createElement('link');
+			linkElem.rel = 'preload';
+			linkElem.as = 'style';
+			linkElem.href = window.URL.createObjectURL(blob);
+			linkElem.onload = () => {
+				linkElementLoaded = true;
+				deferred();
+			};
+
+			document.head.appendChild(linkElem);
+
+			const el = document.createElement('x-thing');
+
+			root.appendChild(el);
+
+			assert.match(
+				document.querySelector('x-thing').shadowRoot.innerHTML,
+				new RegExp(
+					`<span>Hello world!</span><link rel="preload" as="style" href="blob:http://.*?/[a-fA-F0-9]{8}-[a-fA-F0-9]{4}-[a-fA-F0-9]{4}-[a-fA-F0-9]{4}-[a-fA-F0-9]{12}">`
+				)
+			);
+
+			await promise;
+			assert.isTrue(linkElementLoaded);
+
+			linkElem.parentElement.removeChild(linkElem);
+		});
+
+		it('injects style-tags that is added after custom element is loaded', async () => {
+			const el = document.createElement('x-thing');
+
+			root.appendChild(el);
+
+			assert.equal(
+				document.querySelector('x-thing').shadowRoot.innerHTML,
+				'<span>Hello world!</span>'
+			);
+
+			const computedStyle = window
+				.getComputedStyle(
+					document.querySelector('x-thing').shadowRoot.querySelector('span'),
+					null
+				)
+				.getPropertyValue('color');
+
+			assert.equal(computedStyle, 'rgb(0, 0, 0)');
+
+			const styleElem = document.createElement('style');
+			styleElem.innerHTML = 'span { color: red; }';
+
+			// wait for the element to be added
+			await new Promise((resolve) => {
+				new MutationObserver((mutations, observer) => {
+					resolve();
+					observer.disconnect();
+				}).observe(document.querySelector('x-thing').shadowRoot, {
+					childList: true,
+					subtree: true,
+				});
+
+				document.head.appendChild(styleElem);
+			});
+
+			assert.equal(
+				document.querySelector('x-thing').shadowRoot.innerHTML,
+				'<span>Hello world!</span><style>span { color: red; }</style>'
+			);
+
+			styleElem.parentElement.removeChild(styleElem);
+		});
+	});
 });

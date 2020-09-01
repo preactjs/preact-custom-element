@@ -6,6 +6,29 @@ export default function register(Component, tagName, propNames, options) {
 		inst._vdomComponent = Component;
 		inst._root =
 			options && options.shadow ? inst.attachShadow({ mode: 'open' }) : inst;
+
+		if (options && options.shadow && options.injectGlobalStyles) {
+			const defaults = {
+				target: document.head,
+				selector:
+					'style, link[rel="stylesheet"], link[rel="preload"][as="style"]',
+				filter: undefined,
+				observeOptions: { childList: true, subtree: true },
+			};
+
+			this.styleObserver = beginInjectingGlobalStyles(
+				inst.shadowRoot,
+				/* eslint-disable indent */
+				options.injectGlobalStyles === true
+					? defaults
+					: {
+							...defaults,
+							...options.injectGlobalStyles,
+					  }
+				/* eslint-enable indent */
+			);
+		}
+
 		return inst;
 	}
 	PreactElement.prototype = Object.create(HTMLElement.prototype);
@@ -62,6 +85,62 @@ function ContextProvider(props) {
 	return cloneElement(children, rest);
 }
 
+export function cloneElementsToShadowRoot(shadowRoot, elements) {
+	elements.forEach((el) => shadowRoot.appendChild(el.cloneNode(true)));
+}
+
+export function getAllStyles(target, selector, filter) {
+	const elements = Array.prototype.slice.call(
+		target.querySelectorAll(selector)
+	);
+
+	return filter ? elements.filter(filter) : elements;
+}
+
+export const beginInjectingGlobalStyles = (
+	shadowRootRef,
+	injectGlobalStyles
+) => {
+	cloneElementsToShadowRoot(
+		shadowRootRef,
+		getAllStyles(
+			injectGlobalStyles.target,
+			injectGlobalStyles.selector,
+			injectGlobalStyles.filter
+		)
+	);
+
+	return observeStyleChanges(
+		(elements) => {
+			cloneElementsToShadowRoot(shadowRootRef, elements);
+		},
+		injectGlobalStyles.target,
+		injectGlobalStyles.selector,
+		injectGlobalStyles.filter,
+		injectGlobalStyles.observeOptions
+	);
+};
+
+export function observeStyleChanges(
+	callback,
+	target,
+	selector,
+	filter,
+	observeOptions
+) {
+	return new MutationObserver((mutations, observer) => {
+		mutations.forEach((mutation) => {
+			const matchedElements = Array.prototype.slice
+				.call(mutation.addedNodes)
+				.filter((node) => node.matches && node.matches(selector));
+
+			if (matchedElements.length > 0) {
+				callback(filter ? matchedElements.filter(filter) : matchedElements);
+			}
+		});
+	}).observe(target, observeOptions);
+}
+
 function connectedCallback() {
 	// Obtain a reference to the previous context by pinging the nearest
 	// higher up node that was rendered with Preact. If one Preact component
@@ -99,6 +178,10 @@ function attributeChangedCallback(name, oldValue, newValue) {
 
 function disconnectedCallback() {
 	render((this._vdom = null), this._root);
+
+	if (this.styleObserver) {
+		this.styleObserver.disconnect();
+	}
 }
 
 /**
