@@ -1,6 +1,6 @@
 {
 	"name": "preact-custom-element",
-	"version": "4.1.0",
+	"version": "4.2.0",
 	"description": "Wrap your component up as a custom element",
 	"main": "dist/preact-custom-element.js",
 	"module": "dist/preact-custom-element.esm.js",
