@@ -24,6 +24,7 @@
 		"rules": {
 			"brace-style": "off",
 			"jest/expect-expect": "off",
+			"lines-around-comment": "off",
 			"comma-dangle": "off",
 			"no-unused-vars": [
 				2,
