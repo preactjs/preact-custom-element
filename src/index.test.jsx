@@ -295,11 +295,9 @@ describe('web components', () => {
 
 			root.appendChild(el);
 
-			assert.match(
+			assert.equal(
 				document.querySelector('x-thing').shadowRoot.innerHTML,
-				new RegExp(
-					`<span>Hello world!</span><link rel="stylesheet" href="blob:http://.*?/[a-fA-F0-9]{8}-[a-fA-F0-9]{4}-[a-fA-F0-9]{4}-[a-fA-F0-9]{4}-[a-fA-F0-9]{12}">`
-				)
+				`<span>Hello world!</span><link rel="stylesheet" href="${linkElem.href}">`
 			);
 
 			await promise;
@@ -333,11 +331,9 @@ describe('web components', () => {
 
 			root.appendChild(el);
 
-			assert.match(
+			assert.equal(
 				document.querySelector('x-thing').shadowRoot.innerHTML,
-				new RegExp(
-					`<span>Hello world!</span><link rel="preload" as="style" href="blob:http://.*?/[a-fA-F0-9]{8}-[a-fA-F0-9]{4}-[a-fA-F0-9]{4}-[a-fA-F0-9]{4}-[a-fA-F0-9]{12}">`
-				)
+				`<span>Hello world!</span><link rel="preload" as="style" href="${linkElem.href}">`
 			);
 
 			await promise;
