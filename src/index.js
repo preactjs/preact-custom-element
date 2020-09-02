@@ -18,14 +18,14 @@ export default function register(Component, tagName, propNames, options) {
 
 			this.styleObserver = beginInjectingGlobalStyles(
 				inst.shadowRoot,
-				/* eslint-disable indent */
 				options.injectGlobalStyles === true
 					? defaults
-					: {
+					: /* eslint-disable indent */
+					  {
 							...defaults,
 							...options.injectGlobalStyles,
+							/* eslint-enable indent */
 					  }
-				/* eslint-enable indent */
 			);
 		}
 
