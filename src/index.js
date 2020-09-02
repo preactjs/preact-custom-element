@@ -85,11 +85,11 @@ function ContextProvider(props) {
 	return cloneElement(children, rest);
 }
 
-export function cloneElementsToShadowRoot(shadowRoot, elements) {
+function cloneElementsToShadowRoot(shadowRoot, elements) {
 	elements.forEach((el) => shadowRoot.appendChild(el.cloneNode(true)));
 }
 
-export function getAllStyles(target, selector, filter) {
+function getAllStyles(target, selector, filter) {
 	const elements = Array.prototype.slice.call(
 		target.querySelectorAll(selector)
 	);
@@ -97,10 +97,7 @@ export function getAllStyles(target, selector, filter) {
 	return filter ? elements.filter(filter) : elements;
 }
 
-export const beginInjectingGlobalStyles = (
-	shadowRootRef,
-	injectGlobalStyles
-) => {
+const beginInjectingGlobalStyles = (shadowRootRef, injectGlobalStyles) => {
 	cloneElementsToShadowRoot(
 		shadowRootRef,
 		getAllStyles(
@@ -121,7 +118,7 @@ export const beginInjectingGlobalStyles = (
 	);
 };
 
-export function observeStyleChanges(
+function observeStyleChanges(
 	callback,
 	target,
 	selector,
