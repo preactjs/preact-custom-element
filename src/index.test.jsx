@@ -40,6 +40,21 @@ describe('web components', () => {
 		);
 	});
 
+	function NullProps({ size = 'md' }) {
+		return <div>{size.toUpperCase()}</div>;
+	}
+
+	registerElement(NullProps, 'x-null-props', ['size'], { shadow: true });
+
+	// #50
+	it('remove attributes without crashing', () => {
+		const el = document.createElement('x-null-props');
+		assert.doesNotThrow(() => (el.size = 'foo'));
+		root.appendChild(el);
+
+		assert.doesNotThrow(() => el.removeAttribute('size'));
+	});
+
 	describe('DOM properties', () => {
 		it('passes property changes to props', () => {
 			const el = document.createElement('x-clock');
