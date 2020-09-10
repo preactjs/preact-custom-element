@@ -90,6 +90,11 @@ function toCamelCase(str) {
 
 function attributeChangedCallback(name, oldValue, newValue) {
 	if (!this._vdom) return;
+	// Attributes use `null` as an empty value whereas `undefined` is more
+	// common in pure JS components, especially with default parameters.
+	// When calling `node.removeAttribute()` we'll receive `null` as the new
+	// value. See issue #50.
+	newValue = newValue == null ? undefined : newValue;
 	const props = {};
 	props[name] = newValue;
 	props[toCamelCase(name)] = newValue;
