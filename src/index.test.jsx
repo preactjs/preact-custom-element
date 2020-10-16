@@ -132,7 +132,7 @@ describe('web components', () => {
 		});
 	});
 
-	describe('DOM Events', () => {
+	describe('Custom Events', () => {
 		function DummyEvented({ onMyEvent, onMyEventSuccess, onMyEventFailed }) {
 			const clickHandler = () => {
 				onMyEvent('payload').then(onMyEventSuccess, onMyEventFailed);
@@ -146,9 +146,16 @@ describe('web components', () => {
 		const onMyEvent = 'myEvent';
 		const onMyEventSuccess = 'myEventSuccess';
 		const onMyEventFailed = 'myEventFailed';
+		DummyEvented.customEvents = {
+			onMyEvent,
+			onMyEventSuccess,
+			onMyEventFailed,
+		};
 		registerElement(DummyEvented, 'x-dummy-evented', [], {
 			customEvents: { onMyEvent, onMyEventSuccess, onMyEventFailed },
 		});
+
+		registerElement(DummyEvented, 'x-dummy-evented1');
 
 		it('should allow you to expose custom events', (done) => {
 			const el = document.createElement('x-dummy-evented');
@@ -194,6 +201,20 @@ describe('web components', () => {
 
 			el.addEventListener(onMyEventFailed, (e) => {
 				assert.equal(e.detail.payload, 'failed!');
+				done();
+			});
+
+			act(() => {
+				el.querySelector('button').click();
+			});
+		});
+
+		it('should allow you to expose custom events via the static property', (done) => {
+			const el = document.createElement('x-dummy-evented1');
+			root.appendChild(el);
+
+			el.addEventListener(onMyEvent, (e) => {
+				assert.equal(e.detail.payload, 'payload');
 				done();
 			});
 

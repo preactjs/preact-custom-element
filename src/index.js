@@ -9,11 +9,10 @@ export default function register(Component, tagName, propNames, options) {
 
 		inst._customEvents = {};
 		const customEvents =
-			options && (options.customEvents || Component.customEvents);
+			(options && options.customEvents) || Component.customEvents;
 		if (customEvents) {
 			Object.keys(customEvents).forEach((eventName) => {
-				// external event name can be provided, defaults to convention of "(on)EventName"
-				const emitName = customEvents[eventName] || eventName.slice(2);
+				const emitName = customEvents[eventName] || eventName;
 				const handler = (payload) => inst.dispatch(emitName, payload);
 				// later to propagate to props
 				inst._customEvents[eventName] = handler;
