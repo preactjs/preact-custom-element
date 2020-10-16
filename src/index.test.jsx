@@ -134,9 +134,9 @@ describe('web components', () => {
 
 	describe('Custom Events', () => {
 		function DummyEvented({ onMyEvent, onMyEventSuccess, onMyEventFailed }) {
-			const clickHandler = () => {
+			function clickHandler() {
 				onMyEvent('payload').then(onMyEventSuccess, onMyEventFailed);
-			};
+			}
 			return (
 				<div>
 					<button onClick={clickHandler}>click</button>
@@ -157,7 +157,11 @@ describe('web components', () => {
 
 		registerElement(DummyEvented, 'x-dummy-evented1');
 
-		it('should allow you to expose custom events', (done) => {
+		it('should allow you to expose custom events', async () => {
+			let done;
+			const promise = new Promise((resolve) => {
+				done = resolve;
+			});
 			const el = document.createElement('x-dummy-evented');
 			root.appendChild(el);
 
@@ -168,10 +172,15 @@ describe('web components', () => {
 
 			act(() => {
 				el.querySelector('button').click();
+				return promise;
 			});
 		});
 
-		it('should enable async events (resolved)', (done) => {
+		it('should enable async events (resolved)', async () => {
+			let done;
+			const promise = new Promise((resolve) => {
+				done = resolve;
+			});
 			const el = document.createElement('x-dummy-evented');
 			root.appendChild(el);
 
@@ -187,10 +196,15 @@ describe('web components', () => {
 
 			act(() => {
 				el.querySelector('button').click();
+				return promise;
 			});
 		});
 
-		it('should enable async events (rejected)', (done) => {
+		it('should enable async events (rejected)', async () => {
+			let done;
+			const promise = new Promise((resolve) => {
+				done = resolve;
+			});
 			const el = document.createElement('x-dummy-evented');
 			root.appendChild(el);
 
@@ -206,10 +220,15 @@ describe('web components', () => {
 
 			act(() => {
 				el.querySelector('button').click();
+				return promise;
 			});
 		});
 
-		it('should allow you to expose custom events via the static property', (done) => {
+		it('should allow you to expose custom events via the static property', async () => {
+			let done;
+			const promise = new Promise((resolve) => {
+				done = resolve;
+			});
 			const el = document.createElement('x-dummy-evented1');
 			root.appendChild(el);
 
@@ -220,6 +239,7 @@ describe('web components', () => {
 
 			act(() => {
 				el.querySelector('button').click();
+				return promise;
 			});
 		});
 	});
