@@ -132,6 +132,77 @@ describe('web components', () => {
 		});
 	});
 
+	describe('DOM Events', () => {
+		function DummyEvented({ onMyEvent, onMyEventSuccess, onMyEventFailed }) {
+			const clickHandler = () => {
+				onMyEvent('payload').then(onMyEventSuccess, onMyEventFailed);
+			};
+			return (
+				<div>
+					<button onClick={clickHandler}>click</button>
+				</div>
+			);
+		}
+		const onMyEvent = 'myEvent';
+		const onMyEventSuccess = 'myEventSuccess';
+		const onMyEventFailed = 'myEventFailed';
+		registerElement(DummyEvented, 'x-dummy-evented', [], {
+			customEvents: { onMyEvent, onMyEventSuccess, onMyEventFailed },
+		});
+
+		it('should allow you to expose custom events', (done) => {
+			const el = document.createElement('x-dummy-evented');
+			root.appendChild(el);
+
+			el.addEventListener(onMyEvent, (e) => {
+				assert.equal(e.detail.payload, 'payload');
+				done();
+			});
+
+			act(() => {
+				el.querySelector('button').click();
+			});
+		});
+
+		it('should enable async events (resolved)', (done) => {
+			const el = document.createElement('x-dummy-evented');
+			root.appendChild(el);
+
+			el.addEventListener(onMyEvent, (e) => {
+				const callback = e.detail.callback;
+				callback('success');
+			});
+
+			el.addEventListener(onMyEventSuccess, (e) => {
+				assert.equal(e.detail.payload, 'success');
+				done();
+			});
+
+			act(() => {
+				el.querySelector('button').click();
+			});
+		});
+
+		it('should enable async events (rejected)', (done) => {
+			const el = document.createElement('x-dummy-evented');
+			root.appendChild(el);
+
+			el.addEventListener(onMyEvent, (e) => {
+				const callback = e.detail.callback;
+				callback(null, 'failed!');
+			});
+
+			el.addEventListener(onMyEventFailed, (e) => {
+				assert.equal(e.detail.payload, 'failed!');
+				done();
+			});
+
+			act(() => {
+				el.querySelector('button').click();
+			});
+		});
+	});
+
 	function Foo({ text, children }) {
 		return (
 			<span class="wrapper">
