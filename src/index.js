@@ -27,7 +27,13 @@ export default function register(Component, tagName, propNames, options) {
 	propNames.forEach((name) => {
 		Object.defineProperty(PreactElement.prototype, name, {
 			get() {
-				return this._vdom.props[name];
+				if (this._vdom) {
+					return this._vdom.props[name];
+				}
+
+				if (!this._props) this._props = {};
+
+				return this._props[name];
 			},
 			set(v) {
 				if (this._vdom) {
@@ -35,7 +41,7 @@ export default function register(Component, tagName, propNames, options) {
 				} else {
 					if (!this._props) this._props = {};
 					this._props[name] = v;
-					this.connectedCallback();
+					this._props[toCamelCase(name)] = v;
 				}
 
 				// Reflect property changes to attributes if the value is a primitive
