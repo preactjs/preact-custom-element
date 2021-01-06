@@ -212,6 +212,9 @@ describe('web components', () => {
 	}
 
 	registerElement(DisplayTheme, 'x-display-theme', [], { shadow: true });
+	registerElement(DisplayTheme, 'x-display-theme-no-shadow', [], {
+		shadow: false,
+	});
 
 	function Parent({ children, theme = 'dark' }) {
 		return (
@@ -222,6 +225,7 @@ describe('web components', () => {
 	}
 
 	registerElement(Parent, 'x-parent', ['theme'], { shadow: true });
+	registerElement(Parent, 'x-parent-no-shadow', ['theme'], { shadow: false });
 
 	it('passes context over custom element boundaries', async () => {
 		const el = document.createElement('x-parent');
@@ -244,5 +248,54 @@ describe('web components', () => {
 			el.setAttribute('theme', 'sunny');
 		});
 		assert.equal(getShadowHTML(), '<p>Active theme: sunny</p>');
+	});
+
+	it('passes context over custom element boundaries (no shadow)', async () => {
+		const el = document.createElement('x-parent-no-shadow');
+
+		const noSlot = document.createElement('x-display-theme-no-shadow');
+		el.appendChild(noSlot);
+
+		root.appendChild(el);
+		assert.equal(
+			root.innerHTML,
+			'<x-parent-no-shadow><div class="children"><x-display-theme-no-shadow><p>Active theme: dark</p></x-display-theme-no-shadow></div></x-parent-no-shadow>'
+		);
+
+		const getDisplayThemeHTML = () =>
+			document.querySelector('x-display-theme-no-shadow').innerHTML;
+		assert.equal(getDisplayThemeHTML(), '<p>Active theme: dark</p>');
+
+		// Trigger context update
+		act(() => {
+			el.setAttribute('theme', 'sunny');
+		});
+		assert.equal(getDisplayThemeHTML(), '<p>Active theme: sunny</p>');
+	});
+
+	function NoShadow({ children }) {
+		return <div class="children">{children}</div>;
+	}
+
+	registerElement(NoShadow, 'x-no-shadow-parent', [], { shadow: false });
+
+	registerElement(NoShadow, 'x-no-shadow-children', [], { shadow: false });
+
+	it('correctly draws children without shadow', async () => {
+		const el = document.createElement('x-no-shadow-parent');
+
+		const elementChildren = document.createElement('x-no-shadow-children');
+
+		const spanChildren = document.createElement('span');
+		spanChildren.innerHTML = 'hello world';
+
+		elementChildren.appendChild(spanChildren);
+		el.appendChild(elementChildren);
+
+		root.appendChild(el);
+		assert.equal(
+			root.innerHTML,
+			'<x-no-shadow-parent><div class="children"><x-no-shadow-children><div class="children"><span>hello world</span></div></x-no-shadow-children></div></x-no-shadow-parent>'
+		);
 	});
 });

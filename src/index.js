@@ -1,13 +1,16 @@
-import { h, cloneElement, render, hydrate } from 'preact';
+import { h, Fragment, cloneElement, render, hydrate } from 'preact';
 
 export default function register(Component, tagName, propNames, options) {
 	function PreactElement() {
 		const inst = Reflect.construct(HTMLElement, [], PreactElement);
 		inst._vdomComponent = Component;
-		inst._root =
-			options && options.shadow ? inst.attachShadow({ mode: 'open' }) : inst;
+		inst._shadowEnabled = options && options.shadow;
+		inst._root = inst._shadowEnabled
+			? inst.attachShadow({ mode: 'open' })
+			: inst;
 		return inst;
 	}
+
 	PreactElement.prototype = Object.create(HTMLElement.prototype);
 	PreactElement.prototype.constructor = PreactElement;
 	PreactElement.prototype.connectedCallback = connectedCallback;
@@ -79,7 +82,7 @@ function connectedCallback() {
 	this._vdom = h(
 		ContextProvider,
 		{ ...this._props, context },
-		toVdom(this, this._vdomComponent)
+		toVdom(this, this._vdomComponent, this._shadowEnabled)
 	);
 	(this.hasAttribute('hydrate') ? hydrate : render)(this._vdom, this._root);
 }
@@ -114,9 +117,11 @@ function disconnectedCallback() {
  * after having fired the event.
  */
 function Slot(props, context) {
+	const { shadow, addContextListener, removeContextListener, ...rest } = props;
+
 	const ref = (r) => {
 		if (!r) {
-			this.ref.removeEventListener('_preact', this._listener);
+			removeContextListener(this._listener, this.ref);
 		} else {
 			this.ref = r;
 			if (!this._listener) {
@@ -124,14 +129,23 @@ function Slot(props, context) {
 					event.stopPropagation();
 					event.detail.context = context;
 				};
-				r.addEventListener('_preact', this._listener);
+				addContextListener(this._listener, this.ref);
 			}
 		}
 	};
-	return h('slot', { ...props, ref });
+
+	if (!shadow && !this._listener) {
+		this._listener = (event) => {
+			event.stopPropagation();
+			event.detail.context = context;
+		};
+		addContextListener(this._listener);
+	}
+
+	return h(shadow ? 'slot' : Fragment, { ...rest, ref });
 }
 
-function toVdom(element, nodeName) {
+function toVdom(element, nodeName, shadow) {
 	if (element.nodeType === 3) return element.data;
 	if (element.nodeType !== 1) return null;
 	let children = [],
@@ -147,17 +161,46 @@ function toVdom(element, nodeName) {
 	}
 
 	for (i = cn.length; i--; ) {
-		const vnode = toVdom(cn[i], null);
+		const vnode = toVdom(cn[i], null, shadow);
 		// Move slots correctly
 		const name = cn[i].slot;
 		if (name) {
-			props[name] = h(Slot, { name }, vnode);
+			props[name] = h(
+				Slot,
+				{
+					name,
+					shadow,
+					addContextListener(listener, element = cn[i]) {
+						element.addEventListener('_preact', listener);
+					},
+					removeContextListener(listener, element = cn[i]) {
+						element.removeEventListener('_preact', listener);
+					},
+				},
+				vnode
+			);
 		} else {
 			children[i] = vnode;
 		}
 	}
 
 	// Only wrap the topmost node with a slot
-	const wrappedChildren = nodeName ? h(Slot, null, children) : children;
+	const wrappedProps = {
+		shadow,
+		addContextListener(listener, e = element) {
+			e.addEventListener('_preact', listener);
+		},
+		removeContextListener(listener, e = element) {
+			e.removeEventListener('_preact', listener);
+		},
+	};
+
+	const wrappedChildren = nodeName ? h(Slot, wrappedProps, children) : children;
+
+	// Remove all children from the topmost node in non-shadow mode
+	if (!shadow && nodeName) {
+		element.innerHTML = '';
+	}
+
 	return h(nodeName || element.nodeName.toLowerCase(), props, wrappedChildren);
 }
