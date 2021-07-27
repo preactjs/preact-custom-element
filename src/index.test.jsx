@@ -245,4 +245,32 @@ describe('web components', () => {
 		});
 		assert.equal(getShadowHTML(), '<p>Active theme: sunny</p>');
 	});
+
+	function ManualRegistration() {
+		return <div>I'm manually registered</div>;
+	}
+
+	it('allows manual deferred registration by just exposing the element', async () => {
+		const CustomElement = registerElement.toCustomElement(
+			ManualRegistration,
+			[],
+			{ shadow: false }
+		);
+
+		const el = document.createElement('x-manually-registered');
+
+		root.appendChild(el);
+		assert.equal(
+			root.innerHTML,
+			'<x-manually-registered></x-manually-registered>'
+		);
+
+		window.customElements.define('x-manually-registered', CustomElement);
+
+		root.appendChild(el);
+		assert.equal(
+			root.innerHTML,
+			"<x-manually-registered><div>I'm manually registered</div></x-manually-registered>"
+		);
+	});
 });

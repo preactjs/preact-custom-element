@@ -69,6 +69,23 @@ FullName.propTypes = {
 register(FullName, 'full-name');
 ```
 
+### Creating a CustomElements without registering a tag name
+
+If authoring a custom-elements library, you might want to expose your CustomElements without registering their tag name, to let your users register their own tags.
+
+This can be achieved by calling the `toCustomElements` function on the default export:
+
+```js
+import register from 'preact-custom-element'
+
+function MyComponent({ name = "World" }) {
+  return <span>Hello {name}!</span>  
+}
+
+export const MyElement = register.toCustomElement(MyComponent, ['name'])
+```
+
+`toCustomElement` has the same signature as `register`, omitting the second parameter (tag name).
 
 ## Related
 
