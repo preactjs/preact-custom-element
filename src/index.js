@@ -1,11 +1,27 @@
 import { h, cloneElement, render, hydrate } from 'preact';
 
 export default function register(Component, tagName, propNames, options) {
+	const resolvedTagName =
+		tagName || Component.tagName || Component.displayName || Component.name;
+
 	function PreactElement() {
 		const inst = Reflect.construct(HTMLElement, [], PreactElement);
 		inst._vdomComponent = Component;
 		inst._root =
 			options && options.shadow ? inst.attachShadow({ mode: 'open' }) : inst;
+
+		let template = document.getElementById(`${resolvedTagName}-styles`);
+		if (!template && options && options.styles) {
+			template = document.createElement('template');
+			template.id = `${resolvedTagName}-styles`;
+			template.innerHTML = `<style id='${resolvedTagName}-styles-tag'>${options.styles}</style>`;
+			document.head.appendChild(template.cloneNode(true));
+		}
+
+		if (template) {
+			inst._root.appendChild(template.content.cloneNode(true));
+		}
+
 		return inst;
 	}
 	PreactElement.prototype = Object.create(HTMLElement.prototype);
@@ -49,10 +65,7 @@ export default function register(Component, tagName, propNames, options) {
 		});
 	});
 
-	return customElements.define(
-		tagName || Component.tagName || Component.displayName || Component.name,
-		PreactElement
-	);
+	return customElements.define(resolvedTagName, PreactElement);
 }
 
 function ContextProvider(props) {
