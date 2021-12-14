@@ -15,11 +15,10 @@ export default function register(Component, tagName, propNames, options) {
 	PreactElement.prototype.attributeChangedCallback = attributeChangedCallback;
 	PreactElement.prototype.disconnectedCallback = disconnectedCallback;
 
+	// b \ a
+	// take all Component properties and remove existing PreactElement properties
 	const a = new Set(Object.getOwnPropertyNames(PreactElement.prototype));
 	const b = new Set(Object.getOwnPropertyNames(Component.prototype));
-
-	// b \ a
-	// take all Component properties and remove any properties fround in PreactElement
 	const diff = Array.from(new Set([...b].filter((x) => !a.has(x))));
 
 	PreactElement.prototype = diff.reduce((acc, propertyName) => {

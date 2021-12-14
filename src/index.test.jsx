@@ -261,7 +261,7 @@ describe('web components', () => {
 
 	registerElement(Greeting, 'x-greeting');
 
-	it(`should mirror components' methods`, async () => {
+	it(`should mirror component methods`, async () => {
 		const cmp = document.createElement('x-greeting');
 
 		expect(cmp.hello).to.not.be.undefined;
