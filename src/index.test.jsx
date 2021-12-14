@@ -1,5 +1,5 @@
-import { assert } from '@open-wc/testing';
-import { h, createContext } from 'preact';
+import { assert, expect } from '@open-wc/testing';
+import { h, createContext, Component } from 'preact';
 import { useContext } from 'preact/hooks';
 import { act } from 'preact/test-utils';
 import registerElement from './index';
@@ -244,5 +244,27 @@ describe('web components', () => {
 			el.setAttribute('theme', 'sunny');
 		});
 		assert.equal(getShadowHTML(), '<p>Active theme: sunny</p>');
+	});
+
+	class Greeting extends Component {
+		static tagName = 'x-greeting';
+		static observedAttributes = ['name'];
+
+		hello() {
+			return 'hello world';
+		}
+
+		render({ name }) {
+			return <p>Hello, {name}!</p>;
+		}
+	}
+
+	registerElement(Greeting, 'x-greeting');
+
+	it(`should mirror components' methods`, async () => {
+		const cmp = document.createElement('x-greeting');
+
+		expect(cmp.hello).to.not.be.undefined;
+		expect(cmp.hello()).to.eql('hello world');
 	});
 });

@@ -8,11 +8,24 @@ export default function register(Component, tagName, propNames, options) {
 			options && options.shadow ? inst.attachShadow({ mode: 'open' }) : inst;
 		return inst;
 	}
+
 	PreactElement.prototype = Object.create(HTMLElement.prototype);
 	PreactElement.prototype.constructor = PreactElement;
 	PreactElement.prototype.connectedCallback = connectedCallback;
 	PreactElement.prototype.attributeChangedCallback = attributeChangedCallback;
 	PreactElement.prototype.disconnectedCallback = disconnectedCallback;
+
+	const a = new Set(Object.getOwnPropertyNames(PreactElement.prototype));
+	const b = new Set(Object.getOwnPropertyNames(Component.prototype));
+
+	// b \ a
+	// take all Component properties and remove any properties fround in PreactElement
+	const diff = Array.from(new Set([...b].filter((x) => !a.has(x))));
+
+	PreactElement.prototype = diff.reduce((acc, propertyName) => {
+		acc[propertyName] = Component.prototype[propertyName];
+		return acc;
+	}, PreactElement.prototype);
 
 	propNames =
 		propNames ||
