@@ -246,25 +246,32 @@ describe('web components', () => {
 		assert.equal(getShadowHTML(), '<p>Active theme: sunny</p>');
 	});
 
-	class Greeting extends Component {
-		static tagName = 'x-greeting';
-		static observedAttributes = ['name'];
-
-		hello() {
-			return 'hello world';
+	class Counter extends Component {
+		constructor() {
+			super();
+			this.counter = 0;
 		}
 
-		render({ name }) {
-			return <p>Hello, {name}!</p>;
+		whoami() {
+			return 'counter';
+		}
+
+		count() {
+			this.counter++;
+			return this.counter;
+		}
+
+		render() {
+			return <p>Count</p>;
 		}
 	}
 
-	registerElement(Greeting, 'x-greeting');
+	registerElement(Counter, 'x-counter');
 
 	it(`should mirror component methods`, async () => {
-		const cmp = document.createElement('x-greeting');
+		const cmp = document.createElement('x-counter');
 
-		expect(cmp.hello).to.not.be.undefined;
-		expect(cmp.hello()).to.eql('hello world');
+		expect(cmp.whoami).to.not.be.undefined;
+		expect(cmp.whoami()).to.eql('counter');
 	});
 });

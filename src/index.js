@@ -1,5 +1,19 @@
 import { h, cloneElement, render, hydrate } from 'preact';
 
+const lifecycleMethods = [
+	'componentWillMount',
+	'componentDidMount',
+	'componentWillUnmount',
+	'componentWillReceiveProps',
+	'getDerivedStateFromProps',
+	'shouldComponentUpdate',
+	'componentWillUpdate',
+	'getSnapshotBeforeUpdate',
+	'componentDidUpdate	',
+];
+
+const apiMethods = ['render'];
+
 export default function register(Component, tagName, propNames, options) {
 	function PreactElement() {
 		const inst = Reflect.construct(HTMLElement, [], PreactElement);
@@ -15,15 +29,16 @@ export default function register(Component, tagName, propNames, options) {
 	PreactElement.prototype.attributeChangedCallback = attributeChangedCallback;
 	PreactElement.prototype.disconnectedCallback = disconnectedCallback;
 
-	// b \ a
-	// take all Component properties and remove existing PreactElement properties
-	const a = new Set(Object.getOwnPropertyNames(PreactElement.prototype));
-	const b = new Set(Object.getOwnPropertyNames(Component.prototype));
-	const diff = Array.from(new Set([...b].filter((x) => !a.has(x))));
+	const methods = Object.getOwnPropertyNames(Component.prototype)
+		.filter((propertyName) => !lifecycleMethods.includes(propertyName))
+		.filter((propertyName) => !apiMethods.includes(propertyName))
+		.filter(
+			(propertyName) => typeof Component.prototype[propertyName] === 'function'
+		);
 
-	PreactElement.prototype = diff.reduce((acc, propertyName) => {
-		acc[propertyName] = Component.prototype[propertyName];
-		return acc;
+	PreactElement.prototype = methods.reduce((el, propertyName) => {
+		el[propertyName] = Component.prototype[propertyName];
+		return el;
 	}, PreactElement.prototype);
 
 	propNames =
