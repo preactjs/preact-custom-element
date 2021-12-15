@@ -9,7 +9,7 @@ const lifecycleMethods = [
 	'shouldComponentUpdate',
 	'componentWillUpdate',
 	'getSnapshotBeforeUpdate',
-	'componentDidUpdate	',
+	'componentDidUpdate',
 ];
 
 const apiMethods = ['render'];
