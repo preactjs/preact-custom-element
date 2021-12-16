@@ -256,11 +256,6 @@ describe('web components', () => {
 			return 'counter';
 		}
 
-		count() {
-			this.counter++;
-			return this.counter;
-		}
-
 		render() {
 			return <p>Count</p>;
 		}
@@ -268,7 +263,13 @@ describe('web components', () => {
 
 	registerElement(Counter, 'x-counter');
 
-	it(`should mirror component methods`, async () => {
+	it('should instantiate on document.createElement()', () => {
+		const cmp = document.createElement('x-counter');
+
+		expect(cmp.counter).to.eql(0);
+	});
+
+	it('should mirror component methods', () => {
 		const cmp = document.createElement('x-counter');
 
 		expect(cmp.whoami).to.not.be.undefined;
