@@ -17,7 +17,7 @@ const Greeting = ({ name = 'World' }) => (
 register(Greeting, 'x-greeting', ['name']);
 ```
 
-> _**\* Note:** as per the [Custom Elements specification](http://w3c.github.io/webcomponents/spec/custom/#prod-potentialcustomelementname), the tag name must contain a hyphen._
+> _**\* Note:** as per the [Custom Elements specification](https://html.spec.whatwg.org/multipage/custom-elements.html#valid-custom-element-name), the tag name must contain a hyphen._
 
 Use the new tag name in HTML, attribute keys and values will be passed in as props:
 
