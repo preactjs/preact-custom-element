@@ -14,7 +14,7 @@ const Greeting = ({ name = 'World' }) => (
   <p>Hello, {name}!</p>
 );
 
-register(Greeting, 'x-greeting', ['name']);
+register(Greeting, 'x-greeting', ['name'], { shadow: false });
 ```
 
 > _**\* Note:** as per the [Custom Elements specification](https://html.spec.whatwg.org/multipage/custom-elements.html#valid-custom-element-name), the tag name must contain a hyphen._
