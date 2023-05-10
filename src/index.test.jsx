@@ -1,5 +1,5 @@
 import { assert } from '@open-wc/testing';
-import { h, createContext, Component } from 'preact';
+import { h, createContext, Component, Fragment } from 'preact';
 import { useContext } from 'preact/hooks';
 import { act } from 'preact/test-utils';
 import registerElement from './index';
@@ -358,5 +358,59 @@ describe('web components', () => {
 
 		const style = getComputedStyle(child);
 		assert.equal(style.color, 'rgb(255, 0, 0)');
+	});
+
+	it('renders my-foo with child element correctly', () => {
+		function FooComponent(props) {
+			return (
+				<Fragment>
+					<h1>My Heading</h1>
+					<div>{props.children}</div>
+				</Fragment>
+			);
+		}
+
+		registerElement(FooComponent, 'my-foo', [], { shadow: false });
+
+		const el = document.createElement('my-foo');
+
+		const specialElement = document.createElement(
+			'some-special-custom-element'
+		);
+		specialElement.textContent = 'Lorem doFoo';
+		el.appendChild(specialElement);
+
+		root.appendChild(el);
+		assert.equal(
+			root.innerHTML,
+			'<my-foo><h1>My Heading</h1><div><some-special-custom-element>Lorem doFoo</some-special-custom-element></div></my-foo>'
+		);
+	});
+
+	it('renders my-foo with child element in shadow dom with slot', () => {
+		function FooComponent(props) {
+			return (
+				<Fragment>
+					<h1>My Heading</h1>
+					<div>{props.children}</div>
+				</Fragment>
+			);
+		}
+
+		registerElement(FooComponent, 'my-foo-shadow', [], { shadow: true });
+
+		const el = document.createElement('my-foo-shadow');
+
+		const specialElement = document.createElement(
+			'some-special-custom-element'
+		);
+		specialElement.textContent = 'Lorem doFoo';
+		el.appendChild(specialElement);
+
+		root.appendChild(el);
+		assert.equal(
+			el.shadowRoot.innerHTML,
+			'<h1>My Heading</h1><div><slot><some-special-custom-element>Lorem doFoo</some-special-custom-element></slot></div>'
+		);
 	});
 });
