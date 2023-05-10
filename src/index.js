@@ -243,9 +243,9 @@ function toVdom(element, nodeName, options) {
 		? h(options && options.shadow === false ? PseudoSlot : Slot, null, children)
 		: children;
 
+	// Remove all children from the topmost node in non-shadow mode
 	if (options && options.shadow === false && nodeName) {
-		const lastChildElement = element.lastChild;
-		element.removeChild(lastChildElement);
+		element.innerHTML = '';
 	}
 	return h(nodeName || element.nodeName.toLowerCase(), props, wrappedChildren);
 }
