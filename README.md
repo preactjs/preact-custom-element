@@ -5,7 +5,7 @@ Previous versions (< 3.0.0) implemented the v0 proposal, which was only implemen
 
 ## Usage
 
-Import `register` and call it with your component, a tag name __\*__, and a list of attribute names you want to observe:
+Import `register` and call it with your component, a tag name<strong>*</strong>, and a list of attribute names you want to observe:
 
 ```javascript
 import register from 'preact-custom-element';
