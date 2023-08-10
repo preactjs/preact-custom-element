@@ -6,6 +6,24 @@ export default function register(Component, tagName, propNames, options) {
 		inst._vdomComponent = Component;
 		inst._root =
 			options && options.shadow ? inst.attachShadow({ mode: 'open' }) : inst;
+
+		inst._customEvents = {};
+		const customEvents =
+			(options && options.customEvents) || Component.customEvents;
+		if (customEvents) {
+			Object.keys(customEvents).forEach((eventName) => {
+				const emitName = customEvents[eventName] || eventName;
+				const handler = (payload) => inst.dispatch(emitName, payload);
+				// later to propagate to props
+				inst._customEvents[eventName] = handler;
+				Object.defineProperty(inst, eventName, {
+					get() {
+						return handler;
+					},
+				});
+			});
+		}
+
 		return inst;
 	}
 	PreactElement.prototype = Object.create(HTMLElement.prototype);
@@ -13,6 +31,7 @@ export default function register(Component, tagName, propNames, options) {
 	PreactElement.prototype.connectedCallback = connectedCallback;
 	PreactElement.prototype.attributeChangedCallback = attributeChangedCallback;
 	PreactElement.prototype.disconnectedCallback = disconnectedCallback;
+	PreactElement.prototype.dispatch = dispatch;
 
 	propNames =
 		propNames ||
@@ -78,7 +97,7 @@ function connectedCallback() {
 
 	this._vdom = h(
 		ContextProvider,
-		{ ...this._props, context },
+		{ ...this._props, ...this._customEvents, context },
 		toVdom(this, this._vdomComponent)
 	);
 	(this.hasAttribute('hydrate') ? hydrate : render)(this._vdom, this._root);
@@ -160,4 +179,22 @@ function toVdom(element, nodeName) {
 	// Only wrap the topmost node with a slot
 	const wrappedChildren = nodeName ? h(Slot, null, children) : children;
 	return h(nodeName || element.nodeName.toLowerCase(), props, wrappedChildren);
+}
+
+function dispatch(eventName, payload) {
+	return new Promise((resolve, reject) => {
+		const callback = (result, error) => {
+			if (error !== undefined) {
+				reject(error);
+				return;
+			}
+			resolve(result);
+		};
+		this.dispatchEvent(
+			new CustomEvent(eventName, {
+				bubbles: true,
+				detail: { callback, payload },
+			})
+		);
+	});
 }

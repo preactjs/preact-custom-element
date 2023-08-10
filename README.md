@@ -69,6 +69,60 @@ FullName.propTypes = {
 register(FullName, 'full-name');
 ```
 
+### Custom Events
+
+If you want to be able to emit custom events from your web component then you can add a `customEvents` object to the options.
+Alternatively they can be supplied on the component. The events will be added to the props. They are async (Promise) methods
+that the outside can respond to via a callback. Whatever you pass in to the method will be the `payload` in the event detail.
+
+```js
+function MyAsyncComponent({ onError, onLoaded, src }) {
+  const [posts, setPosts] = useState(null);
+
+  useEffect(() => {
+    if (!src) return;
+    axios.get(src).then(res => {
+      setPosts(res.data);
+      onLoaded(`Loaded ${res.data.length} posts`)
+        .then(res => {
+          console.log('got ack from host, do something...', res);
+        });
+    }, onError);
+  }, [src]);
+
+  return (
+    <div>
+      { posts ?
+        posts.map(post => <Post key={post.id} data={post} />) :
+        <span>Loading...</span>
+      }
+    </div>
+  );
+}
+register(MyAsyncComponent, 'x-my-async', ['src'], {
+  customEvents: { onLoaded: 'loaded', onError: 'error' }
+});
+```
+
+Later in the consuming HTML page:
+
+```html
+<x-my-async id="my1"></x-my-async>
+<script>
+  const el = document.querySelector('#my1');
+  el.addEventListener('loaded', (e) => {
+    const { payload, callback } = e.detail;
+    console.log(payload);
+    // Loaded xx posts
+    callback('ok got it');
+  });
+  el.addEventListener('error', (e) => {
+    const { payload } = e.detail;
+    console.error('oh no failed to load posts');
+  });
+  el.setAttribute('src', 'https://jsonplaceholder.typicode.com/posts');
+</script>
+```
 
 ## Related
 

@@ -132,6 +132,118 @@ describe('web components', () => {
 		});
 	});
 
+	describe('Custom Events', () => {
+		function DummyEvented({ onMyEvent, onMyEventSuccess, onMyEventFailed }) {
+			function clickHandler() {
+				onMyEvent('payload').then(onMyEventSuccess, onMyEventFailed);
+			}
+			return (
+				<div>
+					<button onClick={clickHandler}>click</button>
+				</div>
+			);
+		}
+		const onMyEvent = 'myEvent';
+		const onMyEventSuccess = 'myEventSuccess';
+		const onMyEventFailed = 'myEventFailed';
+		DummyEvented.customEvents = {
+			onMyEvent,
+			onMyEventSuccess,
+			onMyEventFailed,
+		};
+		registerElement(DummyEvented, 'x-dummy-evented', [], {
+			customEvents: { onMyEvent, onMyEventSuccess, onMyEventFailed },
+		});
+
+		registerElement(DummyEvented, 'x-dummy-evented1');
+
+		it('should allow you to expose custom events', async () => {
+			let done;
+			const promise = new Promise((resolve) => {
+				done = resolve;
+			});
+			const el = document.createElement('x-dummy-evented');
+			root.appendChild(el);
+
+			el.addEventListener(onMyEvent, (e) => {
+				assert.equal(e.detail.payload, 'payload');
+				done();
+			});
+
+			act(() => {
+				el.querySelector('button').click();
+				return promise;
+			});
+		});
+
+		it('should enable async events (resolved)', async () => {
+			let done;
+			const promise = new Promise((resolve) => {
+				done = resolve;
+			});
+			const el = document.createElement('x-dummy-evented');
+			root.appendChild(el);
+
+			el.addEventListener(onMyEvent, (e) => {
+				const callback = e.detail.callback;
+				callback('success');
+			});
+
+			el.addEventListener(onMyEventSuccess, (e) => {
+				assert.equal(e.detail.payload, 'success');
+				done();
+			});
+
+			act(() => {
+				el.querySelector('button').click();
+				return promise;
+			});
+		});
+
+		it('should enable async events (rejected)', async () => {
+			let done;
+			const promise = new Promise((resolve) => {
+				done = resolve;
+			});
+			const el = document.createElement('x-dummy-evented');
+			root.appendChild(el);
+
+			el.addEventListener(onMyEvent, (e) => {
+				const callback = e.detail.callback;
+				callback(null, 'failed!');
+			});
+
+			el.addEventListener(onMyEventFailed, (e) => {
+				assert.equal(e.detail.payload, 'failed!');
+				done();
+			});
+
+			act(() => {
+				el.querySelector('button').click();
+				return promise;
+			});
+		});
+
+		it('should allow you to expose custom events via the static property', async () => {
+			let done;
+			const promise = new Promise((resolve) => {
+				done = resolve;
+			});
+			const el = document.createElement('x-dummy-evented1');
+			root.appendChild(el);
+
+			el.addEventListener(onMyEvent, (e) => {
+				assert.equal(e.detail.payload, 'payload');
+				done();
+			});
+
+			act(() => {
+				el.querySelector('button').click();
+				return promise;
+			});
+		});
+	});
+
 	function Foo({ text, children }) {
 		return (
 			<span class="wrapper">
