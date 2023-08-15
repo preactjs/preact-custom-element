@@ -10,27 +10,15 @@ jobs:
   test:
     runs-on: ubuntu-latest
     steps:
-      - uses: actions/checkout@v1
-      - uses: actions/setup-node@v1
+      - uses: actions/checkout@v3
+      - uses: actions/setup-node@v3
         with:
-          node-version: '12.x'
-      - name: Install webkit deps
-        run: |
-          sudo apt-get update 
-          sudo apt-get install libgstreamer1.0-0 libbrotli1 libopus0 libwoff1 libgstreamer-plugins-base1.0-0 libgstreamer-gl1.0-0 libgstreamer-plugins-bad1.0-0 libopenjp2-7 libwebpdemux2 libhyphen0 libgles2
-      - name: Cache node modules
-        uses: actions/cache@v1
-        env:
-          cache-name: cache-node-modules
-        with:
-          path: ~/.npm
-          # This uses the same name as the build-action so we can share the caches.
-          key: ${{ runner.os }}-build-${{ env.cache-name }}-${{ hashFiles('**/package-lock.json') }}
-          restore-keys: |
-            ${{ runner.os }}-build-${{ env.cache-name }}-
-            ${{ runner.os }}-build-
-            ${{ runner.os }}-
-      - run: npm ci
+          node-version: 18.x
+          cache: npm
+      - name: Install NPM dependencies
+        run: npm ci
+      - name: Install playwright dependencies
+        run: npx playwright install-deps
       - name: build
         run: npm run prepare
       - name: test
