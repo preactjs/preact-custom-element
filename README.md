@@ -69,6 +69,63 @@ FullName.propTypes = {
 register(FullName, 'full-name');
 ```
 
+### API
+
+### register(Component, tagName, props?, options?)
+
+Returns a Custom Element.
+
+#### Component
+
+Type: `object`
+
+#### tagName
+
+Type: `string`
+
+#### props?
+
+Type: `Array<string>`
+
+#### options
+
+Type: `boolean | object`
+Default: `false`
+
+#### options.shadow
+
+Type: `boolean`
+Default: `false`
+
+Attaches a Shadow DOM instance to your Custom Element. Remember that global styles won't affect the Custom Element unless you inject (see `options.injectGlobalStyles`) or somehow import them from the component itself.
+
+#### options.injectGlobalStyles
+
+Type: `boolean | object`
+Default: `false`
+
+Injects current and future style and link elements related to styling into your Custom Element. Only works if `shadow: true`.
+
+##### options.injectGlobalStyles.target
+
+Type: `DOMNode`
+Default: `document.head`
+
+Where to look for styles to get added. Most 3rd party tooling loads style tags into document.head.
+
+##### options.injectGlobalStyles.selector
+
+Type: `(querySelector) string`
+Default: `'style, link[rel="stylesheet"], link[rel="preload"][as="style"]'`
+
+What types of elements to inject to your Custom Element's Shadow DOM.
+
+##### options.injectGlobalStyles.filter
+
+Type: `Function<boolean>`
+Default: `undefined`
+
+Allows you to filter what elements get added to the Custom Element more granularly. Gets executed on `addedNodes` by the MutationObserver, as well as the initial styles present on the page.
 
 ## Related
 
