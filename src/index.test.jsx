@@ -245,4 +245,38 @@ describe('web components', () => {
 		});
 		assert.equal(getShadowHTML(), '<p>Active theme: sunny</p>');
 	});
+
+	it('renders element in shadow dom open mode', async () => {
+		function ShadowDomOpen() {
+			return <div className="shadow-child">Shadow DOM Open</div>;
+		}
+
+		registerElement(ShadowDomOpen, 'x-shadowdom-open', [], {
+			shadow: true,
+			mode: 'open',
+		});
+
+		const el = document.createElement('x-shadowdom-open');
+		root.appendChild(el);
+		const shadowRoot = el.shadowRoot;
+		assert.isTrue(!!shadowRoot);
+		const child = shadowRoot.querySelector('.shadow-child');
+		assert.isTrue(!!child);
+		assert.equal(child.textContent, 'Shadow DOM Open');
+	});
+
+	it('renders element in shadow dom closed mode', async () => {
+		function ShadowDomClosed() {
+			return <div className="shadow-child">Shadow DOM Closed</div>;
+		}
+
+		registerElement(ShadowDomClosed, 'x-shadowdom-closed', [], {
+			shadow: true,
+			mode: 'closed',
+		});
+
+		const el = document.createElement('x-shadowdom-closed');
+		root.appendChild(el);
+		assert.isTrue(el.shadowRoot === null);
+	});
 });

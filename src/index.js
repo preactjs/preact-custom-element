@@ -5,7 +5,7 @@ export default function register(Component, tagName, propNames, options) {
 		const inst = Reflect.construct(HTMLElement, [], PreactElement);
 		inst._vdomComponent = Component;
 		inst._root =
-			options && options.shadow ? inst.attachShadow({ mode: 'open' }) : inst;
+			options && options.shadow ? inst.attachShadow({ mode: options.mode || 'open' }) : inst;
 		return inst;
 	}
 	PreactElement.prototype = Object.create(HTMLElement.prototype);
