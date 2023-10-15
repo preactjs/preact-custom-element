@@ -19,7 +19,7 @@
 		"extends": "developit",
 		"settings": {
 			"react": {
-				"version": "latest"
+				"version": "detect"
 			}
 		},
 		"rules": {
