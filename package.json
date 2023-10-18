@@ -4,6 +4,7 @@
 	"description": "Wrap your component up as a custom element",
 	"main": "dist/preact-custom-element.js",
 	"module": "dist/preact-custom-element.esm.js",
+	"types": "dist/index.d.ts",
 	"unpkg": "dist/preact-custom-element.umd.js",
 	"source": "src/index.js",
 	"scripts": {
@@ -64,7 +65,7 @@
 		"get-stream": "^6.0.0",
 		"husky": "^4.2.5",
 		"lint-staged": "^10.2.13",
-		"microbundle": "^0.12.3",
+		"microbundle": "^0.15.1",
 		"preact": "^10.4.8",
 		"prettier": "^2.1.1"
 	},
