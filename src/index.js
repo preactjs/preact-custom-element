@@ -1,11 +1,52 @@
 import { h, cloneElement, render, hydrate } from 'preact';
 
+/**
+ * @typedef {import('preact').FunctionComponent<any> | import('preact').ComponentClass<any> | import('preact').FunctionalComponent<any> } ComponentDefinition
+ * @typedef {{ shadow: false } | { shadow: true, mode: 'open' | 'closed'}} Options
+ * @typedef {HTMLElement & { _root: ShadowRoot | HTMLElement, _vdomComponent: ComponentDefinition, _vdom: ReturnType<typeof import("preact").h> | null }} PreactCustomElement
+ */
+
+/**
+ * Register a preact component as web-component.
+ * @param {ComponentDefinition} Component The preact component to register
+ * @param {string} [tagName] The HTML element tag-name (must contain a hyphen and be lowercase)
+ * @param {string[]} [propNames] HTML element attributes to observe
+ * @param {Options} [options] Additional element options
+ * @example
+ * ```ts
+ * // use custom web-component class
+ * class PreactWebComponent extends Component {
+ *   static tagName = 'my-web-component';
+ *   render() {
+ *     return <p>Hello world!</p>
+ *   }
+ * }
+ *
+ * register(PreactComponent);
+ *
+ * // use a preact component
+ * function PreactComponent({ prop }) {
+ *   return <p>Hello {prop}!</p>
+ * }
+ *
+ * register(PreactComponent, 'my-component');
+ * register(PreactComponent, 'my-component', ['prop']);
+ * register(PreactComponent, 'my-component', ['prop'], {
+ *   shadow: true,
+ *   mode: 'closed'
+ * });
+ * ```
+ */
 export default function register(Component, tagName, propNames, options) {
 	function PreactElement() {
-		const inst = Reflect.construct(HTMLElement, [], PreactElement);
+		const inst = /** @type {PreactCustomElement} */ (
+			Reflect.construct(HTMLElement, [], PreactElement)
+		);
 		inst._vdomComponent = Component;
 		inst._root =
-			options && options.shadow ? inst.attachShadow({ mode: options.mode || 'open' }) : inst;
+			options && options.shadow
+				? inst.attachShadow({ mode: options.mode || 'open' })
+				: inst;
 		return inst;
 	}
 	PreactElement.prototype = Object.create(HTMLElement.prototype);
@@ -14,6 +55,9 @@ export default function register(Component, tagName, propNames, options) {
 	PreactElement.prototype.attributeChangedCallback = attributeChangedCallback;
 	PreactElement.prototype.disconnectedCallback = disconnectedCallback;
 
+	/**
+	 * @type {string[]}
+	 */
 	propNames =
 		propNames ||
 		Component.observedAttributes ||
@@ -62,6 +106,9 @@ function ContextProvider(props) {
 	return cloneElement(children, rest);
 }
 
+/**
+ * @this {PreactCustomElement}
+ */
 function connectedCallback() {
 	// Obtain a reference to the previous context by pinging the nearest
 	// higher up node that was rendered with Preact. If one Preact component
@@ -84,10 +131,22 @@ function connectedCallback() {
 	(this.hasAttribute('hydrate') ? hydrate : render)(this._vdom, this._root);
 }
 
+/**
+ * Camel-cases a string
+ * @param {string} str The string to transform to camelCase
+ * @returns camel case version of the string
+ */
 function toCamelCase(str) {
 	return str.replace(/-(\w)/g, (_, c) => (c ? c.toUpperCase() : ''));
 }
 
+/**
+ * Changed whenver an attribute of the HTML element changed
+ * @this {PreactCustomElement}
+ * @param {string} name The attribute name
+ * @param {unknown} oldValue The old value or undefined
+ * @param {unknown} newValue The new value
+ */
 function attributeChangedCallback(name, oldValue, newValue) {
 	if (!this._vdom) return;
 	// Attributes use `null` as an empty value whereas `undefined` is more
@@ -102,6 +161,9 @@ function attributeChangedCallback(name, oldValue, newValue) {
 	render(this._vdom, this._root);
 }
 
+/**
+ * @this {PreactCustomElement}
+ */
 function disconnectedCallback() {
 	render((this._vdom = null), this._root);
 }

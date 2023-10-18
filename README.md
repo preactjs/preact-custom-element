@@ -71,29 +71,6 @@ FullName.propTypes = {
 register(FullName, 'full-name');
 ```
 
-### Using the shadow DOM
-
-It is possible to attach a shadow root to the custom element to have your component rendered in a separate subtree.
-Customization of the shadow root `mode` is also possible on element basis.
-Read more about the shadow DOM on [MDN](https://developer.mozilla.org/en-US/docs/Web/API/ShadowRoot).
-
-```tsx
-function WithShadow(props) {
-	return <span>Hello from shadow root!</span>;
-}
-
-// use shadow root in "open" mode
-register(FullName, 'full-name', [], {
-	shadow: true,
-});
-
-// use shadow root in "closed" mode
-register(FullName, 'full-name-encapsulated', [], {
-	shadow: true,
-	mode: 'closed',
-});
-```
-
 ## Related
 
 [preact-shadow-dom](https://github.com/bspaulding/preact-shadow-dom)
