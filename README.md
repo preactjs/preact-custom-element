@@ -5,12 +5,14 @@ Previous versions (< 3.0.0) implemented the v0 proposal, which was only implemen
 
 ## Usage
 
-Import `register` and call it with your component, a tag name<strong>\*</strong>, and a list of attribute names you want to observe:
+Import `register` and call it with your component, a tag name<strong>*</strong>, and a list of attribute names you want to observe:
 
 ```javascript
 import register from 'preact-custom-element';
 
-const Greeting = ({ name = 'World' }) => <p>Hello, {name}!</p>;
+const Greeting = ({ name = 'World' }) => (
+  <p>Hello, {name}!</p>
+);
 
 register(Greeting, 'x-greeting', ['name']);
 ```
@@ -40,15 +42,15 @@ import register from 'preact-custom-element';
 
 // <x-greeting name="Bo"></x-greeting>
 class Greeting extends Component {
-	// Register as <x-greeting>:
-	static tagName = 'x-greeting';
+  // Register as <x-greeting>:
+  static tagName = 'x-greeting';
 
-	// Track these attributes:
-	static observedAttributes = ['name'];
+  // Track these attributes:
+  static observedAttributes = ['name'];
 
-	render({ name }) {
-		return <p>Hello, {name}!</p>;
-	}
+  render({ name }) {
+    return <p>Hello, {name}!</p>;
+  }
 }
 register(Greeting);
 ```
@@ -58,18 +60,15 @@ If no `observedAttributes` are specified, they will be inferred from the keys of
 ```js
 // Other option: use PropTypes:
 function FullName(props) {
-	return (
-		<span>
-			{props.first} {props.last}
-		</span>
-	);
+  return <span>{props.first} {props.last}</span>
 }
 FullName.propTypes = {
-	first: Object, // you can use PropTypes, or this
-	last: Object, // trick to define untyped props.
+  first: Object,   // you can use PropTypes, or this
+  last: Object     // trick to define untyped props.
 };
 register(FullName, 'full-name');
 ```
+
 
 ## Related
 
