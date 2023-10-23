@@ -128,6 +128,9 @@ function connectedCallback() {
 		{ ...this._props, context },
 		toVdom(this, this._vdomComponent)
 	);
+
+	// rendering to clear node
+	this.innerHTML = "";
 	(this.hasAttribute('hydrate') ? hydrate : render)(this._vdom, this._root);
 }
 
