@@ -130,6 +130,33 @@ describe('web components', () => {
 			});
 			assert.equal(other, 1);
 		});
+
+		it('sets complex property after other property', () => {
+			const el = document.createElement('x-dummy-button');
+
+			// set simple property first
+			el.text = 'click me';
+
+			let clicks = 0;
+			const onClick = () => clicks++;
+			el.onClick = onClick;
+
+			assert.equal(el.text, 'click me');
+			assert.equal(el.onClick, onClick);
+
+			root.appendChild(el);
+			assert.equal(
+				root.innerHTML,
+				'<x-dummy-button text="click me"><button>click me</button></x-dummy-button>'
+			);
+
+			act(() => {
+				el.querySelector('button').click();
+			});
+
+			assert.equal(el.onClick, onClick);
+			assert.equal(clicks, 1);
+		});
 	});
 
 	function Foo({ text, children }) {
