@@ -68,7 +68,7 @@ export default function register(Component, tagName, propNames, options) {
 	propNames.forEach((name) => {
 		Object.defineProperty(PreactElement.prototype, name, {
 			get() {
-				return this._vdom.props[name];
+				return this._vdom?.props?.[name] ?? this._props?.[name];
 			},
 			set(v) {
 				if (this._vdom) {
