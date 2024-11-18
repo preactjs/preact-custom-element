@@ -55,6 +55,40 @@ describe('web components', () => {
 		assert.doesNotThrow(() => el.removeAttribute('size'));
 	});
 
+	describe('disconnectedCallback', () => {
+		it('should call callback when element is removed from dom', () => {
+			const Bar = () => <div />;
+			let callbackExecuted = false;
+			const callback = () => {
+				callbackExecuted = true;
+			};
+			registerElement(Bar, 'x-bar', [], undefined, callback);
+			const el = document.createElement('x-bar');
+
+			root.appendChild(el);
+			assert.equal(root.innerHTML, '<x-bar><div></div></x-bar>');
+
+			root.removeChild(el);
+			assert.equal(callbackExecuted, true);
+		});
+
+		it('should call async callback when element is removed from dom', () => {
+			const Baz = () => <div />;
+			let callbackExecuted = false;
+			const callback = async () => {
+				callbackExecuted = true;
+			};
+			registerElement(Baz, 'x-baz', [], undefined, callback);
+			const el = document.createElement('x-baz');
+
+			root.appendChild(el);
+			assert.equal(root.innerHTML, '<x-baz><div></div></x-baz>');
+
+			root.removeChild(el);
+			assert.equal(callbackExecuted, true);
+		});
+	});
+
 	describe('DOM properties', () => {
 		it('passes property changes to props', () => {
 			const el = document.createElement('x-clock');

@@ -3,7 +3,8 @@ import { h, cloneElement, render, hydrate } from 'preact';
 /**
  * @typedef {import('preact').FunctionComponent<any> | import('preact').ComponentClass<any> | import('preact').FunctionalComponent<any> } ComponentDefinition
  * @typedef {{ shadow: false } | { shadow: true, mode: 'open' | 'closed'}} Options
- * @typedef {HTMLElement & { _root: ShadowRoot | HTMLElement, _vdomComponent: ComponentDefinition, _vdom: ReturnType<typeof import("preact").h> | null }} PreactCustomElement
+ * @typedef {() => (Promise<void> | void) | null } Callback
+ * @typedef {HTMLElement & { _root: ShadowRoot | HTMLElement, _vdomComponent: ComponentDefinition, _vdom: ReturnType<typeof import("preact").h> | null, _callback: Callback }} PreactCustomElement
  */
 
 /**
@@ -12,6 +13,7 @@ import { h, cloneElement, render, hydrate } from 'preact';
  * @param {string} [tagName] The HTML element tag-name (must contain a hyphen and be lowercase)
  * @param {string[]} [propNames] HTML element attributes to observe
  * @param {Options} [options] Additional element options
+ * @param {Callback} [callback] Optional callback function which gets executed within `disconnectedCallback`
  * @example
  * ```ts
  * // use custom web-component class
@@ -37,7 +39,13 @@ import { h, cloneElement, render, hydrate } from 'preact';
  * });
  * ```
  */
-export default function register(Component, tagName, propNames, options) {
+export default function register(
+	Component,
+	tagName,
+	propNames,
+	options,
+	callback
+) {
 	function PreactElement() {
 		const inst = /** @type {PreactCustomElement} */ (
 			Reflect.construct(HTMLElement, [], PreactElement)
@@ -47,6 +55,7 @@ export default function register(Component, tagName, propNames, options) {
 			options && options.shadow
 				? inst.attachShadow({ mode: options.mode || 'open' })
 				: inst;
+		inst._callback = callback;
 		return inst;
 	}
 	PreactElement.prototype = Object.create(HTMLElement.prototype);
@@ -165,6 +174,7 @@ function attributeChangedCallback(name, oldValue, newValue) {
  * @this {PreactCustomElement}
  */
 function disconnectedCallback() {
+	void this._callback?.();
 	render((this._vdom = null), this._root);
 }
 
