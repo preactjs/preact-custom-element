@@ -64,6 +64,10 @@ export default function register(Component, tagName, propNames, options) {
 		Object.keys(Component.propTypes || {});
 	PreactElement.observedAttributes = propNames;
 
+	if (Component.formAssociated) {
+		PreactElement.formAssociated = true;
+	}
+
 	// Keep DOM properties and Preact props in sync
 	propNames.forEach((name) => {
 		Object.defineProperty(PreactElement.prototype, name, {
