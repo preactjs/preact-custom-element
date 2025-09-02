@@ -22,9 +22,6 @@ jobs:
       - name: Install NPM dependencies
         run: npm ci
 
-      - name: Install playwright dependencies
-        run: npx playwright install-deps
-
       - name: build
         run: npm run build
 
@@ -33,4 +30,4 @@ jobs:
           CI: true
         run: |
           npm run lint
-          npm run test:browsers
+          npm run test
