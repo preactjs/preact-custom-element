@@ -8,7 +8,7 @@
 	"module": "dist/preact-custom-element.esm.js",
 	"unpkg": "dist/preact-custom-element.umd.js",
 	"scripts": {
-		"build": "microbundle -f cjs,es,umd",
+		"build": "microbundle -f cjs,es,umd --no-generateTypes",
 		"lint": "eslint src/*.{js,jsx}",
 		"test": "wtr src/*.test.{js,jsx}",
 		"prettier": "prettier **/*.{js,jsx} --write",
