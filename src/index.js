@@ -1,19 +1,16 @@
 import { h, cloneElement, render, hydrate } from 'preact';
 
 /**
- * @typedef {import('preact').FunctionComponent<any> | import('preact').ComponentClass<any> | import('preact').FunctionalComponent<any> } ComponentDefinition
- * @typedef {{ shadow: false } | { shadow: true, mode?: 'open' | 'closed', adoptedStyleSheets?: CSSStyleSheet[] }} Options
- * @typedef {HTMLElement & { _root: ShadowRoot | HTMLElement, _vdomComponent: ComponentDefinition, _vdom: ReturnType<typeof import("preact").h> | null }} PreactCustomElement
+ * @typedef {import('./index.d.ts').PreactCustomElement} PreactCustomElement
  */
 
 /**
  * Register a preact component as web-component.
- * @param {ComponentDefinition} Component The preact component to register
- * @param {string} [tagName] The HTML element tag-name (must contain a hyphen and be lowercase)
- * @param {string[]} [propNames] HTML element attributes to observe
- * @param {Options} [options] Additional element options
+ *
+ * @type {import('./index.d.ts').default}
+ *
  * @example
- * ```ts
+ * ```jsx
  * // use custom web-component class
  * class PreactWebComponent extends Component {
  *   static tagName = 'my-web-component';
