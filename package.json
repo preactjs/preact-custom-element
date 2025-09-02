@@ -2,18 +2,18 @@
 	"name": "preact-custom-element",
 	"version": "4.4.0",
 	"description": "Wrap your component up as a custom element",
+	"source": "src/index.js",
+	"types": "dist/index.d.ts",
 	"main": "dist/preact-custom-element.js",
 	"module": "dist/preact-custom-element.esm.js",
-	"types": "dist/index.d.ts",
 	"unpkg": "dist/preact-custom-element.umd.js",
-	"source": "src/index.js",
 	"scripts": {
-		"prepare": "microbundle",
+		"build": "microbundle -f cjs,es,umd",
 		"lint": "eslint src/*.{js,jsx}",
 		"test": "wtr src/*.test.{js,jsx}",
 		"test:browsers": "wtr src/*.test.{js,jsx} --playwright --browsers chromium firefox webkit",
 		"prettier": "prettier **/*.{js,jsx} --write",
-		"prepublishOnly": "npm run lint && npm run test"
+		"prepublishOnly": "npm run build && npm run lint && npm run test"
 	},
 	"eslintConfig": {
 		"extends": "developit",
@@ -55,28 +55,24 @@
 		"preact": ">= 10.25.0 || >=11.0.0-0"
 	},
 	"devDependencies": {
-		"@open-wc/testing": "^2.5.25",
-		"@web/dev-server-core": "^0.5.2",
-		"@web/dev-server-esbuild": "^0.4.1",
-		"@web/test-runner": "^0.17.0",
-		"@web/test-runner-playwright": "^0.10.1",
+		"@open-wc/testing": "^4.0.0",
+		"@web/dev-server-esbuild": "^1.0.4",
+		"@web/test-runner": "^0.20.2",
+		"@web/test-runner-playwright": "^0.11.1",
 		"eslint": "^7.7.0",
 		"eslint-config-developit": "^1.2.0",
-		"get-stream": "^6.0.0",
-		"husky": "^4.2.5",
-		"lint-staged": "^10.2.13",
 		"microbundle": "^0.15.1",
-		"preact": "^10.4.8",
-		"prettier": "^2.1.1"
+		"nano-staged": "^0.8.0",
+		"preact": "^10.27.1",
+		"prettier": "^2.1.1",
+		"simple-git-hooks": "^2.13.1"
 	},
-	"lint-staged": {
+	"simple-git-hooks": {
+		"pre-commit": "npx nano-staged"
+	},
+	"nano-staged": {
 		"**/*.{js,jsx,ts,tsx,yml}": [
 			"prettier --write"
 		]
-	},
-	"husky": {
-		"hooks": {
-			"pre-commit": "lint-staged"
-		}
 	}
 }
