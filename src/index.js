@@ -2,7 +2,7 @@ import { h, cloneElement, render, hydrate } from 'preact';
 
 /**
  * @typedef {import('preact').FunctionComponent<any> | import('preact').ComponentClass<any> | import('preact').FunctionalComponent<any> } ComponentDefinition
- * @typedef {{ shadow: false } | { shadow: true, mode: 'open' | 'closed'}} Options
+ * @typedef {{ shadow: false } | { shadow: true, mode?: 'open' | 'closed' }} Options
  * @typedef {HTMLElement & { _root: ShadowRoot | HTMLElement, _vdomComponent: ComponentDefinition, _vdom: ReturnType<typeof import("preact").h> | null }} PreactCustomElement
  */
 
