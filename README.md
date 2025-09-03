@@ -105,6 +105,25 @@ register(TextSelection, 'text-selection', [], { shadow: true });
 </text-section>
 ```
 
+### Static Properties
+
+We support a number of static properties on your component that map to special behaviors of the custom element. These can be set on components like so:
+
+```js
+class MyCustomElement extends Component {
+  static tagName = 'my-custom-element';
+}
+
+function MyOtherCustomElement() { ... }
+MyOtherCustomElement.tagName = 'my-other-custom-element';
+```
+
+- `tagName`
+  - the custom element's tag name (if not passed as the second argument to `register()`)
+- `observedAttributes`
+  - an array of attribute names to observe (if not passed as the third argument to `register()`)
+- `formAssociated`
+  - a boolean indicating whether the custom element should be form-associated
 
 ## Related
 
