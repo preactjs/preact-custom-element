@@ -309,4 +309,28 @@ describe('web components', () => {
 		assert.equal(myForm.elements[0].tagName, 'X-FORM-ASSOCIATED-CLASS');
 		assert.equal(myForm.elements[2].tagName, 'X-FORM-ASSOCIATED-FUNCTION');
 	});
+
+	it('supports the `adoptedStyleSheets` option', async () => {
+		function AdoptedStyleSheets() {
+			return <div className="styled-child">Adopted Style Sheets</div>;
+		}
+
+		const sheet = new CSSStyleSheet();
+		sheet.replaceSync('.styled-child { color: red; }');
+
+		registerElement(AdoptedStyleSheets, 'x-adopted-style-sheets', [], {
+			shadow: true,
+			adoptedStyleSheets: [sheet],
+		});
+
+		root.innerHTML = `<x-adopted-style-sheets></x-adopted-style-sheets>`;
+
+		const child = document
+			.querySelector('x-adopted-style-sheets')
+			.shadowRoot
+			.querySelector('.styled-child');
+
+		const style = getComputedStyle(child);
+		assert.equal(style.color, 'rgb(255, 0, 0)');
+	});
 });
