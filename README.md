@@ -5,7 +5,7 @@ Previous versions (< 3.0.0) implemented the v0 proposal, which was only implemen
 
 ## Usage
 
-Import `register` and call it with your component, a tag name<strong>*</strong>, and a list of attribute names you want to observe:
+Any Preact component can be registered as a custom element simply by importing `register` and calling it with your component, a tag name<strong>*</strong>, and a list of attribute names you want to observe:
 
 ```javascript
 import register from 'preact-custom-element';
@@ -14,7 +14,10 @@ const Greeting = ({ name = 'World' }) => (
   <p>Hello, {name}!</p>
 );
 
-register(Greeting, 'x-greeting', ['name']);
+register(Greeting, 'x-greeting', ['name'], { shadow: true, mode: 'open' });
+//          ^            ^           ^             ^               ^
+//          |      HTML tag name     |       use shadow-dom        |
+//   Component definition      Observed attributes     Encapsulation mode for the shadow DOM tree
 ```
 
 > _**\* Note:** as per the [Custom Elements specification](https://html.spec.whatwg.org/multipage/custom-elements.html#valid-custom-element-name), the tag name must contain a hyphen._
@@ -31,9 +34,14 @@ Output:
 <p>Hello, Billy Jo!</p>
 ```
 
-### Prop Names and Automatic Prop Names
+### Observed Attributes
 
-The Custom Elements V1 specification requires explictly stating the names of any attributes you want to observe. From your Preact component perspective, `props` could be an object with any keys at runtime, so it's not always clear which props should be accepted as attributes.
+The Custom Elements v1 specification requires explicitly listing the names of attributes you want to observe in order to respond when their values are changed. These can be specified via the third parameter that's passed to the `register()` function:
+
+```js
+// Listen to changes to the `name` attribute
+register(Greeting, 'x-greeting', ['name']);
+```
 
 If you omit the third parameter to `register()`, the list of attributes to observe can be specified using a static `observedAttributes` property on your Component. This also works for the Custom Element's name, which can be specified using a `tagName` static property:
 
@@ -59,14 +67,42 @@ If no `observedAttributes` are specified, they will be inferred from the keys of
 
 ```js
 // Other option: use PropTypes:
-function FullName(props) {
-  return <span>{props.first} {props.last}</span>
+function FullName({ first, last }) {
+  return <span>{first} {last}</span>
 }
+
 FullName.propTypes = {
   first: Object,   // you can use PropTypes, or this
   last: Object     // trick to define untyped props.
 };
+
 register(FullName, 'full-name');
+```
+
+### Passing slots as props
+
+The `register()` function also accepts an optional fourth parameter, an options bag. At present, it allows you to opt-in to using shadow DOM for your custom element by setting the `shadow` property to `true`, and if so, you can also specify the encapsulation mode with `mode`, which can be either `'open'` or `'closed'`.
+
+When using shadow DOM, you can make use of named `<slot>` elements in your component to forward the custom element's children into specific places in the shadow tree.
+
+```jsx
+function TextSection({ heading, content }) {
+    return (
+        <div>
+            <h2>{heading}</h2>
+            <p>{content}</p>
+        </div>
+    );
+}
+
+register(TextSelection, 'text-selection', [], { shadow: true });
+```
+
+```html
+<text-section>
+    <span slot="heading">My Heading</span>
+    <span slot="content">Some content goes here.</span>
+</text-section>
 ```
 
 
