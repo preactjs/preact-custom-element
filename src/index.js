@@ -2,7 +2,7 @@ import { h, cloneElement, render, hydrate } from 'preact';
 
 /**
  * @typedef {import('preact').FunctionComponent<any> | import('preact').ComponentClass<any> | import('preact').FunctionalComponent<any> } ComponentDefinition
- * @typedef {{ shadow: false } | { shadow: true, mode?: 'open' | 'closed' }} Options
+ * @typedef {{ shadow: false } | { shadow: true, mode?: 'open' | 'closed', adoptedStyleSheets?: CSSStyleSheet[] }} Options
  * @typedef {HTMLElement & { _root: ShadowRoot | HTMLElement, _vdomComponent: ComponentDefinition, _vdom: ReturnType<typeof import("preact").h> | null }} PreactCustomElement
  */
 
@@ -47,9 +47,11 @@ export default function register(Component, tagName, propNames, options) {
 			options && options.shadow
 				? inst.attachShadow({ mode: options.mode || 'open' })
 				: inst;
-		if(options && options.adoptedStyleSheets && inst._root.adoptedStyleSheets){
+
+		if (options && options.adoptedStyleSheets) {
 			inst._root.adoptedStyleSheets = options.adoptedStyleSheets;
 		}
+
 		return inst;
 	}
 	PreactElement.prototype = Object.create(HTMLElement.prototype);
