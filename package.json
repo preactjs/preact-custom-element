@@ -8,6 +8,7 @@
 	"module": "dist/preact-custom-element.esm.js",
 	"unpkg": "dist/preact-custom-element.umd.js",
 	"scripts": {
+		"prepare": "npx simple-git-hooks",
 		"build": "microbundle -f cjs,es,umd --no-generateTypes",
 		"lint": "eslint src/*.{js,jsx}",
 		"test": "wtr src/*.test.{js,jsx}",
