@@ -1,5 +1,5 @@
 import { assert } from '@open-wc/testing';
-import { h, createContext } from 'preact';
+import { h, createContext, Component } from 'preact';
 import { useContext } from 'preact/hooks';
 import { act } from 'preact/test-utils';
 import registerElement from './index';
@@ -278,5 +278,35 @@ describe('web components', () => {
 		const el = document.createElement('x-shadowdom-closed');
 		root.appendChild(el);
 		assert.isTrue(el.shadowRoot === null);
+	});
+
+	it('supports the `formAssociated` property', async () => {
+		class FormAssociatedClass extends Component {
+			static formAssociated = true;
+
+			render() {
+				return <input name="foo" />;
+			}
+		}
+		registerElement(FormAssociatedClass, 'x-form-associated-class', []);
+
+		function FormAssociatedFunction() {
+			return <input name="bar" />;
+		}
+		FormAssociatedFunction.formAssociated = true;
+		registerElement(FormAssociatedFunction, 'x-form-associated-function', []);
+
+		root.innerHTML = `
+			<form id="myForm">
+				<x-form-associated-class></x-form-associated-class>
+				<x-form-associated-function></x-form-associated-function>
+			</form>
+		`;
+
+		const myForm = document.getElementById('myForm');
+
+		// The `.elements` property of a form includes all form-associated elements
+		assert.equal(myForm.elements[0].tagName, 'X-FORM-ASSOCIATED-CLASS');
+		assert.equal(myForm.elements[2].tagName, 'X-FORM-ASSOCIATED-FUNCTION');
 	});
 });
