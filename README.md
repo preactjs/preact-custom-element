@@ -14,9 +14,9 @@ const Greeting = ({ name = 'World' }) => (
   <p>Hello, {name}!</p>
 );
 
-register(Greeting, 'x-greeting', ['name'], { shadow: true, mode: 'open' });
-//          ^            ^           ^             ^               ^
-//          |      HTML tag name     |       use shadow-dom        |
+register(Greeting, 'x-greeting', ['name'], { shadow: true, mode: 'open', adoptedStyleSheets: [] });
+//          ^            ^           ^             ^               ^            ^
+//          |      HTML tag name     |       use shadow-dom        |    use adoptedStyleSheets
 //   Component definition      Observed attributes     Encapsulation mode for the shadow DOM tree
 ```
 
