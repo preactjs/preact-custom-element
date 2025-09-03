@@ -134,7 +134,7 @@ function connectedCallback() {
 
 	this._vdom = h(
 		ContextProvider,
-		{ ...this._props, context },
+		{ customElementRoot: this._root, ...this._props, context },
 		toVdom(this, this._vdomComponent)
 	);
 	(this.hasAttribute('hydrate') ? hydrate : render)(this._vdom, this._root);
