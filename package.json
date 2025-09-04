@@ -63,6 +63,7 @@
 	},
 	"devDependencies": {
 		"@open-wc/testing": "^4.0.0",
+		"@types/mocha": "^10.0.10",
 		"@web/dev-server-esbuild": "^1.0.4",
 		"@web/test-runner": "^0.20.2",
 		"eslint": "^7.7.0",
