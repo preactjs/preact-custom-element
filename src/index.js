@@ -4,7 +4,6 @@ import { h, cloneElement, render, hydrate } from 'preact';
  * @typedef {import('./index.d.ts').PreactCustomElement} PreactCustomElement
  */
 
-
 /**
  * @type {import('./index.d.ts').default}
  */
@@ -48,7 +47,9 @@ export default function register(Component, tagName, propNames, options) {
 	propNames.forEach((name) => {
 		Object.defineProperty(PreactElement.prototype, name, {
 			get() {
-				return this._vdom.props[name];
+				return this._vdom
+					? this._vdom.props[name]
+					: this._props[name];
 			},
 			set(v) {
 				if (this._vdom) {
@@ -56,7 +57,6 @@ export default function register(Component, tagName, propNames, options) {
 				} else {
 					if (!this._props) this._props = {};
 					this._props[name] = v;
-					this.connectedCallback();
 				}
 
 				// Reflect property changes to attributes if the value is a primitive
