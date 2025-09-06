@@ -1,8 +1,20 @@
 import { assert } from '@open-wc/testing';
-import { h, createContext, Component } from 'preact';
+import { h, createContext, Component, Fragment } from 'preact';
 import { useContext } from 'preact/hooks';
 import { act } from 'preact/test-utils';
 import registerElement from './index';
+
+/** @param {string} name */
+function createTestElement(name) {
+	const el = document.createElement(name);
+	const child1 = document.createElement('p');
+	child1.textContent = 'Child 1';
+	const child2 = document.createElement('p');
+	child2.textContent = 'Child 2';
+	el.appendChild(child1);
+	el.appendChild(child2);
+	return el;
+}
 
 describe('web components', () => {
 	/** @type {HTMLDivElement} */
@@ -358,5 +370,55 @@ describe('web components', () => {
 
 		const style = getComputedStyle(child);
 		assert.equal(style.color, 'rgb(255, 0, 0)');
+	});
+
+	it('supports controlling light DOM children', async () => {
+		function LightDomChildren({ children }) {
+			return (
+				<Fragment>
+					<h1>Light DOM Children</h1>
+					<div>{children}</div>
+				</Fragment>
+			);
+		}
+
+		registerElement(LightDomChildren, 'light-dom-children', []);
+		registerElement(LightDomChildren, 'light-dom-children-shadow-false', [], {
+			shadow: false,
+		});
+
+		root.appendChild(createTestElement('light-dom-children'));
+		root.appendChild(createTestElement('light-dom-children-shadow-false'));
+
+		assert.equal(
+			document.querySelector('light-dom-children').innerHTML,
+			'<h1>Light DOM Children</h1><div><p>Child 1</p><p>Child 2</p></div>'
+		);
+		assert.equal(
+			document.querySelector('light-dom-children-shadow-false').innerHTML,
+			'<h1>Light DOM Children</h1><div><p>Child 1</p><p>Child 2</p></div>'
+		);
+	});
+
+	it('supports controlling shadow DOM children', () => {
+		function ShadowDomChildren({ children }) {
+			return (
+				<Fragment>
+					<h1>Light DOM Children</h1>
+					<div>{children}</div>
+				</Fragment>
+			);
+		}
+
+		registerElement(ShadowDomChildren, 'shadow-dom-children', [], {
+			shadow: true,
+		});
+
+		root.appendChild(createTestElement('shadow-dom-children'));
+
+		assert.equal(
+			document.querySelector('shadow-dom-children').shadowRoot.innerHTML,
+			'<h1>Light DOM Children</h1><div><slot><p>Child 1</p><p>Child 2</p></slot></div>'
+		);
 	});
 });

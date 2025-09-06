@@ -1,4 +1,4 @@
-import { h, cloneElement, render, hydrate } from 'preact';
+import { h, cloneElement, render, hydrate, Fragment } from 'preact';
 
 /**
  * @typedef {import('./index.d.ts').PreactCustomElement} PreactCustomElement
@@ -26,7 +26,9 @@ export default function register(Component, tagName, propNames, options) {
 	}
 	PreactElement.prototype = Object.create(HTMLElement.prototype);
 	PreactElement.prototype.constructor = PreactElement;
-	PreactElement.prototype.connectedCallback = connectedCallback;
+	PreactElement.prototype.connectedCallback = function () {
+		connectedCallback.call(this, options);
+	};
 	PreactElement.prototype.attributeChangedCallback = attributeChangedCallback;
 	PreactElement.prototype.disconnectedCallback = disconnectedCallback;
 
@@ -89,7 +91,7 @@ function ContextProvider(props) {
 /**
  * @this {PreactCustomElement}
  */
-function connectedCallback() {
+function connectedCallback(options) {
 	// Obtain a reference to the previous context by pinging the nearest
 	// higher up node that was rendered with Preact. If one Preact component
 	// higher up receives our ping, it will set the `detail` property of
@@ -106,7 +108,7 @@ function connectedCallback() {
 	this._vdom = h(
 		ContextProvider,
 		{ ...this._props, context },
-		toVdom(this, this._vdomComponent)
+		toVdom(this, this._vdomComponent, options)
 	);
 	(this.hasAttribute('hydrate') ? hydrate : render)(this._vdom, this._root);
 }
@@ -170,10 +172,11 @@ function Slot(props, context) {
 			}
 		}
 	};
-	return h('slot', { ...props, ref });
+	const { useFragment, ...rest } = props;
+	return h(useFragment ? Fragment : 'slot', { ...rest, ref });
 }
 
-function toVdom(element, nodeName) {
+function toVdom(element, nodeName, options) {
 	if (element.nodeType === 3) return element.data;
 	if (element.nodeType !== 1) return null;
 	let children = [],
@@ -189,7 +192,7 @@ function toVdom(element, nodeName) {
 	}
 
 	for (i = cn.length; i--; ) {
-		const vnode = toVdom(cn[i], null);
+		const vnode = toVdom(cn[i], null, options);
 		// Move slots correctly
 		const name = cn[i].slot;
 		if (name) {
@@ -199,7 +202,15 @@ function toVdom(element, nodeName) {
 		}
 	}
 
+	const shadow = !!(options && options.shadow);
+
 	// Only wrap the topmost node with a slot
-	const wrappedChildren = nodeName ? h(Slot, null, children) : children;
+	const wrappedChildren = nodeName
+		? h(Slot, { useFragment: !shadow }, children)
+		: children;
+
+	if (!shadow && nodeName) {
+		element.innerHTML = '';
+	}
 	return h(nodeName || element.nodeName.toLowerCase(), props, wrappedChildren);
 }
