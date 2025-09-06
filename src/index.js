@@ -172,25 +172,8 @@ function Slot(props, context) {
 			}
 		}
 	};
-	return h('slot', { ...props, ref });
-}
-
-function PseudoSlot(props, context) {
-	const ref = (r) => {
-		if (!r) {
-			this.ref.removeEventListener('_preact', this._listener);
-		} else {
-			this.ref = r;
-			if (!this._listener) {
-				this._listener = (event) => {
-					event.stopPropagation();
-					event.detail.context = context;
-				};
-				r.addEventListener('_preact', this._listener);
-			}
-		}
-	};
-	return h(Fragment, { ...props, ref });
+	const { useFragment, ...rest } = props;
+	return h(useFragment ? Fragment : 'slot', { ...rest, ref });
 }
 
 function toVdom(element, nodeName, options) {
@@ -219,14 +202,14 @@ function toVdom(element, nodeName, options) {
 		}
 	}
 
-	const useShadow = !!(options && options.shadow);
+	const shadow = !!(options && options.shadow);
 
 	// Only wrap the topmost node with a slot
 	const wrappedChildren = nodeName
-		? h(useShadow ? Slot : PseudoSlot, null, children)
+		? h(Slot, { useFragment: !shadow }, children)
 		: children;
 
-	if (!useShadow && nodeName) {
+	if (!shadow && nodeName) {
 		element.innerHTML = '';
 	}
 	return h(nodeName || element.nodeName.toLowerCase(), props, wrappedChildren);
