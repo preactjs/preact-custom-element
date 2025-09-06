@@ -36,7 +36,10 @@
 			]
 		}
 	},
-	"repository": "preactjs/preact-custom-element",
+	"repository": {
+		"type": "git",
+		"url": "git+https://github.com/preactjs/preact-custom-element.git"
+	},
 	"keywords": [
 		"preact",
 		"web",
