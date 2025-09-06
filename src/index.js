@@ -75,10 +75,12 @@ export default function register(Component, tagName, propNames, options) {
 		});
 	});
 
-	return customElements.define(
+	customElements.define(
 		tagName || Component.tagName || Component.displayName || Component.name,
 		PreactElement
 	);
+
+	return PreactElement;
 }
 
 function ContextProvider(props) {
