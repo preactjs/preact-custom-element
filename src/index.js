@@ -49,7 +49,9 @@ export default function register(Component, tagName, propNames, options) {
 	propNames.forEach((name) => {
 		Object.defineProperty(PreactElement.prototype, name, {
 			get() {
-				return this._vdom ? this._vdom.props[name] : this._props[name];
+				return this._vdom
+					? this._vdom.props[name]
+					: this._props[name];
 			},
 			set(v) {
 				if (this._vdom) {
@@ -217,12 +219,14 @@ function toVdom(element, nodeName, options) {
 		}
 	}
 
+	const useShadow = !!(options && options.shadow);
+
 	// Only wrap the topmost node with a slot
 	const wrappedChildren = nodeName
-		? h(options && options.shadow === false ? PseudoSlot : Slot, null, children)
+		? h(useShadow ? Slot : PseudoSlot, null, children)
 		: children;
 
-	if (options && options.shadow === false && nodeName) {
+	if (!useShadow && nodeName) {
 		element.innerHTML = '';
 	}
 	return h(nodeName || element.nodeName.toLowerCase(), props, wrappedChildren);
