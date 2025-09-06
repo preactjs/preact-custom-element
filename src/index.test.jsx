@@ -4,6 +4,18 @@ import { useContext } from 'preact/hooks';
 import { act } from 'preact/test-utils';
 import registerElement from './index';
 
+/** @param {string} name */
+function createTestElement(name) {
+	const el = document.createElement(name);
+	const child1 = document.createElement('p');
+	child1.textContent = 'Child 1';
+	const child2 = document.createElement('p');
+	child2.textContent = 'Child 2';
+	el.appendChild(child1);
+	el.appendChild(child2);
+	return el;
+}
+
 describe('web components', () => {
 	/** @type {HTMLDivElement} */
 	let root;
@@ -360,57 +372,53 @@ describe('web components', () => {
 		assert.equal(style.color, 'rgb(255, 0, 0)');
 	});
 
-	it('renders my-foo with child element correctly', () => {
-		function FooComponent(props) {
+	it('supports controlling light DOM children', async () => {
+		function LightDomChildren({ children }) {
 			return (
 				<Fragment>
-					<h1>My Heading</h1>
-					<div>{props.children}</div>
+					<h1>Light DOM Children</h1>
+					<div>{children}</div>
 				</Fragment>
 			);
 		}
 
-		registerElement(FooComponent, 'my-foo', [], { shadow: false });
+		registerElement(LightDomChildren, 'light-dom-children', []);
+		registerElement(LightDomChildren, 'light-dom-children-shadow-false', [], {
+			shadow: false,
+		});
 
-		const el = document.createElement('my-foo');
+		root.appendChild(createTestElement('light-dom-children'));
+		root.appendChild(createTestElement('light-dom-children-shadow-false'));
 
-		const specialElement = document.createElement(
-			'some-special-custom-element'
-		);
-		specialElement.textContent = 'Lorem doFoo';
-		el.appendChild(specialElement);
-
-		root.appendChild(el);
 		assert.equal(
-			root.innerHTML,
-			'<my-foo><h1>My Heading</h1><div><some-special-custom-element>Lorem doFoo</some-special-custom-element></div></my-foo>'
+			document.querySelector('light-dom-children').innerHTML,
+			'<h1>Light DOM Children</h1><div><p>Child 1</p><p>Child 2</p></div>'
+		);
+		assert.equal(
+			document.querySelector('light-dom-children-shadow-false').innerHTML,
+			'<h1>Light DOM Children</h1><div><p>Child 1</p><p>Child 2</p></div>'
 		);
 	});
 
-	it('renders my-foo with child element in shadow dom with slot', () => {
-		function FooComponent(props) {
+	it('supports controlling shadow DOM children', () => {
+		function ShadowDomChildren({ children }) {
 			return (
 				<Fragment>
-					<h1>My Heading</h1>
-					<div>{props.children}</div>
+					<h1>Light DOM Children</h1>
+					<div>{children}</div>
 				</Fragment>
 			);
 		}
 
-		registerElement(FooComponent, 'my-foo-shadow', [], { shadow: true });
+		registerElement(ShadowDomChildren, 'shadow-dom-children', [], {
+			shadow: true,
+		});
 
-		const el = document.createElement('my-foo-shadow');
+		root.appendChild(createTestElement('shadow-dom-children'));
 
-		const specialElement = document.createElement(
-			'some-special-custom-element'
-		);
-		specialElement.textContent = 'Lorem doFoo';
-		el.appendChild(specialElement);
-
-		root.appendChild(el);
 		assert.equal(
-			el.shadowRoot.innerHTML,
-			'<h1>My Heading</h1><div><slot><some-special-custom-element>Lorem doFoo</some-special-custom-element></slot></div>'
+			document.querySelector('shadow-dom-children').shadowRoot.innerHTML,
+			'<h1>Light DOM Children</h1><div><slot><p>Child 1</p><p>Child 2</p></slot></div>'
 		);
 	});
 });
