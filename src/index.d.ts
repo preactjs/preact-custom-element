@@ -43,6 +43,7 @@ type Options =
  *   shadow: true,
  *   mode: 'closed'
  * });
+ * const klass = register(PreactComponent, 'my-component');
  * ```
  */
 export default function register(
@@ -50,4 +51,4 @@ export default function register(
 	tagName?: string,
 	propNames?: string[],
 	options?: Options
-): void;
+): HTMLElement;
