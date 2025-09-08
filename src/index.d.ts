@@ -46,8 +46,8 @@ type Options =
  * const klass = register(PreactComponent, 'my-component');
  * ```
  */
-export default function register(
-	Component: AnyComponent,
+export default function register<P = {}, S = {}>(
+	Component: AnyComponent<P, S>,
 	tagName?: string,
 	propNames?: string[],
 	options?: Options
