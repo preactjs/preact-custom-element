@@ -15,6 +15,7 @@ type Options =
 			shadow: true;
 			mode?: 'open' | 'closed';
 			adoptedStyleSheets?: CSSStyleSheet[];
+			serializable?: boolean;
 	  };
 
 /**

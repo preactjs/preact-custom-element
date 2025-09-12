@@ -5,32 +5,107 @@ import { h, cloneElement, render, hydrate, Fragment } from 'preact';
  */
 
 /**
+ * Creates a shadow root with serializable support if available
+ * @param {HTMLElement} element - The element to attach the shadow to
+ * @param {object} options - Shadow root options
+ * @returns {ShadowRoot} The created shadow root
+ */
+function createShadowRoot(element, options) {
+	const shadowOptions = { mode: options.mode || 'open' };
+
+	// Add serializable option if requested and supported
+	if (options.serializable) {
+		shadowOptions.serializable = true;
+	}
+
+	try {
+		return element.attachShadow(shadowOptions);
+	} catch (e) {
+		// Fallback for browsers that don't support serializable
+		return element.attachShadow({ mode: options.mode || 'open' });
+	}
+}
+
+// WeakMaps for private instance data
+const privateData = new WeakMap();
+const PRIMITIVE_TYPES = new Set(['string', 'boolean', 'number']);
+
+/**
  * @type {import('./index.d.ts').default}
  */
 export default function register(Component, tagName, propNames, options) {
-	function PreactElement() {
-		const inst = /** @type {PreactCustomElement} */ (
-			Reflect.construct(HTMLElement, [], PreactElement)
-		);
-		inst._vdomComponent = Component;
-		inst._root =
-			options && options.shadow
-				? inst.attachShadow({ mode: options.mode || 'open' })
-				: inst;
+	class PreactElement extends HTMLElement {
+		constructor() {
+			super();
 
-		if (options && options.adoptedStyleSheets) {
-			inst._root.adoptedStyleSheets = options.adoptedStyleSheets;
+			// Initialize private data
+			privateData.set(this, {
+				vdomComponent: Component,
+				props: null,
+				vdom: null,
+			});
+
+			this._root = options?.shadow ? createShadowRoot(this, options) : this;
+
+			if (options?.adoptedStyleSheets) {
+				this._root.adoptedStyleSheets = options.adoptedStyleSheets;
+			}
 		}
 
-		return inst;
+		connectedCallback() {
+			connectedCallback.call(this, options);
+		}
+
+		attributeChangedCallback(name, oldValue, newValue) {
+			const data = privateData.get(this);
+			if (!data?.vdom) return;
+
+			// Attributes use `null` as an empty value whereas `undefined` is more
+			// common in pure JS components, especially with default parameters.
+			newValue = newValue == null ? undefined : newValue;
+			const props = {};
+			props[name] = newValue;
+			props[toCamelCase(name)] = newValue;
+			data.vdom = cloneElement(data.vdom, props);
+			render(data.vdom, this._root);
+		}
+
+		disconnectedCallback() {
+			const data = privateData.get(this);
+			if (data) {
+				data.vdom = null;
+			}
+			render(null, this._root);
+		}
+
+		// Getter and setter for vdom
+		get _vdom() {
+			return privateData.get(this)?.vdom;
+		}
+
+		set _vdom(value) {
+			const data = privateData.get(this);
+			if (data) {
+				data.vdom = value;
+			}
+		}
+
+		// Getter and setter for props
+		get _props() {
+			return privateData.get(this)?.props;
+		}
+
+		set _props(value) {
+			const data = privateData.get(this);
+			if (data) {
+				data.props = value;
+			}
+		}
+
+		get _vdomComponent() {
+			return privateData.get(this)?.vdomComponent;
+		}
 	}
-	PreactElement.prototype = Object.create(HTMLElement.prototype);
-	PreactElement.prototype.constructor = PreactElement;
-	PreactElement.prototype.connectedCallback = function () {
-		connectedCallback.call(this, options);
-	};
-	PreactElement.prototype.attributeChangedCallback = attributeChangedCallback;
-	PreactElement.prototype.disconnectedCallback = disconnectedCallback;
 
 	/**
 	 * @type {string[]}
@@ -49,29 +124,26 @@ export default function register(Component, tagName, propNames, options) {
 	propNames.forEach((name) => {
 		Object.defineProperty(PreactElement.prototype, name, {
 			get() {
-				return this._vdom
-					? this._vdom.props[name]
-					: this._props[name];
+				const data = privateData.get(this);
+				return data?.vdom?.props[name] ?? data?.props?.[name];
 			},
 			set(v) {
-				if (this._vdom) {
+				const data = privateData.get(this);
+				if (data?.vdom) {
 					this.attributeChangedCallback(name, null, v);
 				} else {
-					if (!this._props) this._props = {};
-					this._props[name] = v;
+					if (!data.props) data.props = {};
+					data.props[name] = v;
 				}
 
 				// Reflect property changes to attributes if the value is a primitive
 				const type = typeof v;
-				if (
-					v == null ||
-					type === 'string' ||
-					type === 'boolean' ||
-					type === 'number'
-				) {
+				if (v == null || PRIMITIVE_TYPES.has(type)) {
 					this.setAttribute(name, v);
 				}
 			},
+			enumerable: true,
+			configurable: true,
 		});
 	});
 
@@ -105,14 +177,18 @@ function connectedCallback(options) {
 		cancelable: true,
 	});
 	this.dispatchEvent(event);
-	const context = event.detail.context;
+	// @ts-ignore - context property is added dynamically by event listeners
+	const context = event.detail && event.detail.context;
 
-	this._vdom = h(
-		ContextProvider,
-		{ ...this._props, context },
-		toVdom(this, this._vdomComponent, options)
-	);
-	(this.hasAttribute('hydrate') ? hydrate : render)(this._vdom, this._root);
+	const data = privateData.get(this);
+	if (data) {
+		data.vdom = h(
+			ContextProvider,
+			{ ...data.props, context },
+			toVdom(this, data.vdomComponent, options)
+		);
+		(this.hasAttribute('hydrate') ? hydrate : render)(data.vdom, this._root);
+	}
 }
 
 /**
@@ -159,21 +235,35 @@ function disconnectedCallback() {
  * synchronously, the child can immediately pull of the value right
  * after having fired the event.
  */
+const slotControllers = new WeakMap();
+
 function Slot(props, context) {
 	const ref = (r) => {
+		const controller = slotControllers.get(this);
+
 		if (!r) {
-			this.ref.removeEventListener('_preact', this._listener);
-		} else {
-			this.ref = r;
-			if (!this._listener) {
-				this._listener = (event) => {
-					event.stopPropagation();
-					event.detail.context = context;
-				};
-				r.addEventListener('_preact', this._listener);
+			// Cleanup: abort the controller to remove all listeners
+			if (controller) {
+				controller.abort();
+				slotControllers.delete(this);
 			}
+		} else {
+			// Setup: create new AbortController for this slot
+			const newController = new AbortController();
+			slotControllers.set(this, newController);
+
+			const listener = (event) => {
+				event.stopPropagation();
+				// @ts-ignore - we know context exists in this scope
+				event.detail.context = context;
+			};
+
+			r.addEventListener('_preact', listener, {
+				signal: newController.signal,
+			});
 		}
 	};
+
 	const { useFragment, ...rest } = props;
 	return h(useFragment ? Fragment : 'slot', { ...rest, ref });
 }
