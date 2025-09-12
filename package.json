@@ -1,6 +1,6 @@
 {
 	"name": "preact-custom-element",
-	"version": "4.5.0",
+	"version": "4.5.1",
 	"description": "Wrap your component up as a custom element",
 	"source": "src/index.js",
 	"types": "src/index.d.ts",
