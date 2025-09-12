@@ -49,6 +49,6 @@ type Options =
 export default function register<P = {}, S = {}>(
 	Component: AnyComponent<P, S>,
 	tagName?: string,
-	propNames?: string[],
+	propNames?: (keyof P)[],
 	options?: Options
 ): HTMLElement;
