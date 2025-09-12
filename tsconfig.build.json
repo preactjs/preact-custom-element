@@ -1,0 +1,28 @@
+{
+	"compilerOptions": {
+		"target": "ES2020",
+		"lib": ["ES2020", "DOM"],
+		"module": "ESNext",
+		"moduleResolution": "node",
+		"allowSyntheticDefaultImports": true,
+		"esModuleInterop": true,
+		"jsx": "react-jsx",
+		"jsxImportSource": "preact",
+		"strict": true,
+		"skipLibCheck": true,
+		"forceConsistentCasingInFileNames": true,
+		"declaration": true,
+		"declarationMap": true,
+		"sourceMap": true,
+		"outDir": "./dist-ts",
+		"rootDir": "./src"
+	},
+	"include": [
+		"src/index.ts"
+	],
+	"exclude": [
+		"node_modules",
+		"dist",
+		"src/*.test.*"
+	]
+}

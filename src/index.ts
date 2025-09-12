@@ -5,7 +5,8 @@ import {
 	hydrate,
 	Fragment,
 	AnyComponent,
-	ComponentConstructor,
+	createContext,
+	ComponentChildren,
 } from 'preact';
 
 type PreactCustomElement = HTMLElement & {
@@ -35,7 +36,7 @@ interface PrivateData {
 interface SlotProps {
 	useFragment?: boolean;
 	name?: string;
-	[key: string]: any;
+	[key: string]: unknown;
 }
 
 /**
@@ -56,7 +57,7 @@ function createShadowRoot(
 
 	try {
 		return element.attachShadow(shadowOptions);
-	} catch (e) {
+	} catch {
 		// Fallback for browsers that don't support serializable
 		return element.attachShadow({ mode: options.mode || 'open' });
 	}
@@ -66,6 +67,15 @@ function createShadowRoot(
 const privateData = new WeakMap<HTMLElement, PrivateData>();
 const PRIMITIVE_TYPES = new Set<string>(['string', 'boolean', 'number']);
 
+type ComponentWithMeta = AnyComponent & {
+	observedAttributes?: string[];
+	propTypes?: Record<string, unknown>;
+	formAssociated?: boolean;
+	tagName?: string;
+	displayName?: string;
+	name?: string;
+};
+
 /**
  * Register a preact component as web-component.
  */
@@ -74,7 +84,9 @@ export default function register<P = {}, S = {}>(
 	tagName?: string,
 	propNames?: (keyof P)[],
 	options?: Options
-): typeof HTMLElement {
+): typeof HTMLElement & {
+	new (): PreactCustomElement;
+} {
 	class PreactElement extends HTMLElement implements PreactCustomElement {
 		_root: ShadowRoot | HTMLElement;
 
@@ -111,7 +123,7 @@ export default function register<P = {}, S = {}>(
 			// Attributes use `null` as an empty value whereas `undefined` is more
 			// common in pure JS components, especially with default parameters.
 			const processedNewValue = newValue == null ? undefined : newValue;
-			const props: Record<string, any> = {};
+			const props: Record<string, unknown> = {};
 			props[name] = processedNewValue;
 			props[toCamelCase(name)] = processedNewValue;
 			data.vdom = cloneElement(data.vdom, props);
@@ -165,11 +177,11 @@ export default function register<P = {}, S = {}>(
 	 */
 	const resolvedPropNames: string[] =
 		(propNames as string[]) ||
-		(Component as any).observedAttributes ||
-		Object.keys((Component as any).propTypes || {});
+		(Component as ComponentWithMeta).observedAttributes ||
+		Object.keys((Component as ComponentWithMeta).propTypes || {});
 	PreactElement.observedAttributes = resolvedPropNames;
 
-	if ((Component as any).formAssociated) {
+	if ((Component as ComponentWithMeta).formAssociated) {
 		PreactElement.formAssociated = true;
 	}
 
@@ -178,12 +190,16 @@ export default function register<P = {}, S = {}>(
 		Object.defineProperty(PreactElement.prototype, name, {
 			get(this: PreactElement) {
 				const data = privateData.get(this);
-				return (data?.vdom?.props as any)?.[name] ?? data?.props?.[name];
+				const vdomProps = data?.vdom?.props as unknown as Record<
+					string,
+					unknown
+				>;
+				return vdomProps?.[name] ?? data?.props?.[name];
 			},
-			set(this: PreactElement, v: any) {
+			set(this: PreactElement, v: unknown) {
 				const data = privateData.get(this);
 				if (data?.vdom) {
-					this.attributeChangedCallback(name, null, v);
+					this.attributeChangedCallback(name, null, String(v));
 				} else if (data) {
 					if (!data.props) data.props = {};
 					data.props[name] = v;
@@ -192,7 +208,7 @@ export default function register<P = {}, S = {}>(
 				// Reflect property changes to attributes if the value is a primitive
 				const type = typeof v;
 				if (v == null || PRIMITIVE_TYPES.has(type)) {
-					this.setAttribute(name, v);
+					this.setAttribute(name, String(v));
 				}
 			},
 			enumerable: true,
@@ -202,20 +218,38 @@ export default function register<P = {}, S = {}>(
 
 	customElements.define(
 		tagName ||
-			(Component as any).tagName ||
-			(Component as any).displayName ||
-			(Component as any).name,
+			(Component as ComponentWithMeta).tagName ||
+			(Component as ComponentWithMeta).displayName ||
+			(Component as ComponentWithMeta).name ||
+			'custom-element',
 		PreactElement
 	);
 
-	return PreactElement as any;
+	return PreactElement as typeof HTMLElement & {
+		new (): PreactCustomElement;
+	};
 }
 
-function ContextProvider(this: any, props: any) {
-	this.getChildContext = () => props.context;
-	// eslint-disable-next-line no-unused-vars
+// Create a modern context for passing values between components
+const PreactContext = createContext<unknown>(undefined);
+
+interface ContextProviderProps {
+	context?: unknown;
+	children?: ComponentChildren;
+	[key: string]: unknown; // Allow additional props to be passed through
+}
+
+function ContextProvider(props: ContextProviderProps): ReturnType<typeof h> {
 	const { context, children, ...rest } = props;
-	return cloneElement(children, rest);
+	// Pass additional props to the child element by cloning it
+	const wrappedChild = children
+		? cloneElement(children as ReturnType<typeof h>, rest)
+		: children;
+	return h(
+		PreactContext.Provider,
+		{ value: context },
+		wrappedChild
+	) as ReturnType<typeof h>;
 }
 
 /**
@@ -227,22 +261,22 @@ function connectedCallback(this: PreactCustomElement, options?: Options): void {
 	// higher up receives our ping, it will set the `detail` property of
 	// our custom event. This works because events are dispatched
 	// synchronously.
-	const event = new CustomEvent('_preact', {
+	const event = new CustomEvent<{ context?: unknown }>('_preact', {
 		detail: {},
 		bubbles: true,
 		cancelable: true,
 	});
-	this.dispatchEvent(event as any);
+	this.dispatchEvent(event);
 	// Context property is added dynamically by event listeners
-	const context = (event.detail as any)?.context;
+	const context = event.detail?.context;
 
 	const data = privateData.get(this);
 	if (data) {
 		data.vdom = h(
-			ContextProvider as any,
-			{ ...data.props, context } as any,
+			ContextProvider,
+			{ ...data.props, context } as ContextProviderProps,
 			toVdom(this, data.vdomComponent, options)
-		);
+		) as ReturnType<typeof h>;
 		(this.hasAttribute('hydrate') ? hydrate : render)(data.vdom, this._root);
 	}
 }
@@ -261,9 +295,13 @@ function toCamelCase(str: string): string {
  * synchronously, the child can immediately pull of the value right
  * after having fired the event.
  */
-const slotControllers = new WeakMap<any, AbortController>();
+const slotControllers = new WeakMap<object, AbortController>();
 
-function Slot(this: any, props: SlotProps, context: any) {
+interface SlotThis {
+	[key: string]: unknown;
+}
+
+function Slot(this: SlotThis, props: SlotProps, context: unknown) {
 	const ref = (r: HTMLElement | null) => {
 		const controller = slotControllers.get(this);
 
@@ -281,7 +319,7 @@ function Slot(this: any, props: SlotProps, context: any) {
 			const listener = (event: Event) => {
 				event.stopPropagation();
 				// Context is added dynamically to event detail
-				(event as any).detail.context = context;
+				(event as CustomEvent<{ context?: unknown }>).detail.context = context;
 			};
 
 			r.addEventListener('_preact', listener, {
@@ -291,21 +329,29 @@ function Slot(this: any, props: SlotProps, context: any) {
 	};
 
 	const { useFragment, ...rest } = props;
-	return h(useFragment ? Fragment : 'slot', { ...rest, ref } as any);
+
+	if (useFragment) {
+		// Fragment doesn't accept ref or other props
+		return h(Fragment, {});
+	} else {
+		// Slot element can accept ref and other attributes
+		return h('slot', { ...rest, ref });
+	}
 }
 
 function toVdom(
-	element: HTMLElement,
+	element: Node,
 	nodeName: AnyComponent | null,
 	options?: Options
 ): ReturnType<typeof h> | string | null {
-	if ((element as any).nodeType === 3) return (element as any).data;
-	if ((element as any).nodeType !== 1) return null;
+	if (element.nodeType === 3) return (element as Text).data;
+	if (element.nodeType !== 1) return null;
 
-	const children: any[] = [];
-	const props: Record<string, any> = {};
-	const attributes = element.attributes;
-	const childNodes = element.childNodes;
+	const htmlElement = element as HTMLElement;
+	const children: (ReturnType<typeof h> | string | null)[] = [];
+	const props: Record<string, unknown> = {};
+	const attributes = htmlElement.attributes;
+	const childNodes = htmlElement.childNodes;
 
 	// Process attributes
 	for (let i = attributes.length; i--; ) {
@@ -317,9 +363,9 @@ function toVdom(
 
 	// Process child nodes
 	for (let i = childNodes.length; i--; ) {
-		const vnode = toVdom(childNodes[i] as HTMLElement, null, options);
+		const vnode = toVdom(childNodes[i], null, options);
 		// Move slots correctly
-		const name = (childNodes[i] as any).slot;
+		const name = (childNodes[i] as HTMLElement).slot;
 		if (name) {
 			props[name] = h(Slot, { name }, vnode);
 		} else {
@@ -335,7 +381,11 @@ function toVdom(
 		: children;
 
 	if (!shadow && nodeName) {
-		element.innerHTML = '';
+		htmlElement.innerHTML = '';
 	}
-	return h(nodeName || element.nodeName.toLowerCase(), props, wrappedChildren);
+	return h(
+		nodeName || htmlElement.nodeName.toLowerCase(),
+		props,
+		wrappedChildren
+	);
 }

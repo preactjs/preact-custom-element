@@ -10,9 +10,15 @@
 	"scripts": {
 		"prepare": "npx simple-git-hooks",
 		"build": "microbundle -f cjs,es,umd --no-generateTypes",
-		"lint": "eslint src/*.{js,jsx}",
-		"test": "wtr src/*.test.{js,jsx}",
-		"prettier": "prettier **/*.{js,jsx} --write",
+		"build:ts": "tsc -p tsconfig.build.json",
+		"test:ts": "npm run build:ts && cp dist-ts/index.js src/index.compiled.js && npm run test:compiled && rm src/index.compiled.js",
+		"test:compiled": "wtr src/*.test.{js,jsx} --node-resolve --puppeteer",
+		"lint": "oxlint src/",
+		"lint:legacy": "eslint src/*.{js,jsx}",
+		"typecheck": "tsc --noEmit",
+		"test": "wtr src/*.test.{js,jsx} --puppeteer",
+		"test:all": "npm run typecheck && npm run test && npm run test:ts",
+		"prettier": "prettier **/*.{js,jsx,ts} --write",
 		"prepublishOnly": "npm run build && npm run lint && npm run test"
 	},
 	"eslintConfig": {
@@ -74,6 +80,7 @@
 		"eslint-config-developit": "^1.2.0",
 		"microbundle": "^0.15.1",
 		"nano-staged": "^0.8.0",
+		"oxlint": "^1.15.0",
 		"preact": "^10.27.1",
 		"prettier": "^2.1.1",
 		"simple-git-hooks": "^2.13.1",
