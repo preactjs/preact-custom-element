@@ -11,7 +11,9 @@
 		"prepare": "npx simple-git-hooks",
 		"build": "microbundle -f cjs,es,umd --no-generateTypes",
 		"lint": "eslint src/*.{js,jsx}",
-		"test": "wtr src/*.test.{js,jsx}",
+		"test": "npm run test:types & npm run test:browser",
+		"test:browser": "wtr test/*.test.{js,jsx}",
+		"test:types": "tsc -p test/",
 		"prettier": "prettier **/*.{js,jsx} --write",
 		"prepublishOnly": "npm run build && npm run lint && npm run test"
 	},
@@ -22,6 +24,7 @@
 				"version": "16.8"
 			}
 		},
+		"ignorePatterns": ["*.ts", "*.tsx"],
 		"rules": {
 			"brace-style": "off",
 			"jest/expect-expect": "off",
@@ -75,7 +78,8 @@
 		"nano-staged": "^0.8.0",
 		"preact": "^10.27.1",
 		"prettier": "^2.1.1",
-		"simple-git-hooks": "^2.13.1"
+		"simple-git-hooks": "^2.13.1",
+		"typescript": "^5.9.2"
 	},
 	"simple-git-hooks": {
 		"pre-commit": "npx nano-staged"

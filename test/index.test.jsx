@@ -2,7 +2,7 @@ import { assert } from '@open-wc/testing';
 import { h, createContext, Component, Fragment } from 'preact';
 import { useContext } from 'preact/hooks';
 import { act } from 'preact/test-utils';
-import registerElement from './index';
+import registerElement from '../src/index';
 
 /** @param {string} name */
 function createTestElement(name) {
