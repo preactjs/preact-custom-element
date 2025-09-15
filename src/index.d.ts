@@ -1,5 +1,18 @@
 import { h, AnyComponent } from 'preact';
 
+export type Kebab<
+	T extends string,
+	A extends string = ''
+> = T extends `${infer F}${infer R}`
+	? Kebab<R, `${A}${F extends Lowercase<F> ? '' : '-'}${Lowercase<F>}`>
+	: A;
+
+export type KebabKeys<T> = {
+	[K in keyof T as K extends string ? Kebab<K> : K]: T[K];
+};
+
+export type ObservedAttributeKeys<T> = Array<keyof KebabKeys<T>>;
+
 type PreactCustomElement = HTMLElement & {
 	_root: ShadowRoot | HTMLElement;
 	_vdomComponent: AnyComponent;
@@ -49,6 +62,6 @@ type Options =
 export default function register<P = {}, S = {}>(
 	Component: AnyComponent<P, S>,
 	tagName?: string,
-	propNames?: (keyof P)[],
+	propNames?: ObservedAttributeKeys<P>,
 	options?: Options
 ): HTMLElement;
