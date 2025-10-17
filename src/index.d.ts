@@ -1,11 +1,4 @@
-import { h, AnyComponent } from 'preact';
-
-type PreactCustomElement = HTMLElement & {
-	_root: ShadowRoot | HTMLElement;
-	_vdomComponent: AnyComponent;
-	_vdom: ReturnType<typeof h> | null;
-	_props: Record<string, unknown>;
-};
+import { AnyComponent } from 'preact';
 
 type Options =
 	| {
@@ -46,9 +39,11 @@ type Options =
  * const klass = register(PreactComponent, 'my-component');
  * ```
  */
-export default function register<P = {}, S = {}>(
+declare function register<P = {}, S = {}>(
 	Component: AnyComponent<P, S>,
 	tagName?: string,
 	propNames?: (keyof P)[],
 	options?: Options
 ): HTMLElement;
+
+export = register;

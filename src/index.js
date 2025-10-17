@@ -1,11 +1,11 @@
 import { h, cloneElement, render, hydrate, Fragment } from 'preact';
 
 /**
- * @typedef {import('./index.d.ts').PreactCustomElement} PreactCustomElement
+ * @typedef {import('./internal.d.ts').PreactCustomElement} PreactCustomElement
  */
 
 /**
- * @type {import('./index.d.ts').default}
+ * @type {import('./index.d.ts')}
  */
 export default function register(Component, tagName, propNames, options) {
 	function PreactElement() {
@@ -13,13 +13,15 @@ export default function register(Component, tagName, propNames, options) {
 			Reflect.construct(HTMLElement, [], PreactElement)
 		);
 		inst._vdomComponent = Component;
-		inst._root =
-			options && options.shadow
-				? inst.attachShadow({ mode: options.mode || 'open' })
-				: inst;
 
-		if (options && options.adoptedStyleSheets) {
-			inst._root.adoptedStyleSheets = options.adoptedStyleSheets;
+		if (options && options.shadow) {
+			inst._root = inst.attachShadow({ mode: options.mode || 'open' });
+
+			if (options.adoptedStyleSheets) {
+				inst._root.adoptedStyleSheets = options.adoptedStyleSheets;
+			}
+		} else {
+			inst._root = inst;
 		}
 
 		return inst;
@@ -49,9 +51,7 @@ export default function register(Component, tagName, propNames, options) {
 	propNames.forEach((name) => {
 		Object.defineProperty(PreactElement.prototype, name, {
 			get() {
-				return this._vdom
-					? this._vdom.props[name]
-					: this._props[name];
+				return this._vdom ? this._vdom.props[name] : this._props[name];
 			},
 			set(v) {
 				if (this._vdom) {

@@ -18,12 +18,10 @@ jobs:
         with:
           node-version: 22
           cache: npm
+          cache-dependency-path: '**/package-lock.json'
 
       - name: Install NPM dependencies
         run: npm ci
-
-      - name: build
-        run: npm run build
 
       - name: test
         env:
@@ -31,3 +29,17 @@ jobs:
         run: |
           npm run lint
           npm run test
+
+  size:
+    name: Compressed Size
+    runs-on: ubuntu-latest
+    timeout-minutes: 5
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 22
+          cache: 'npm'
+          cache-dependency-path: '**/package-lock.json'
+
+      - uses: preactjs/compressed-size-action@v2
