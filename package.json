@@ -10,7 +10,7 @@
 	"scripts": {
 		"prepare": "npx simple-git-hooks",
 		"build": "microbundle -f cjs,es,umd --no-generateTypes",
-		"lint": "eslint src/*.{js,jsx}",
+		"lint": "eslint src/*.js",
 		"test": "npm run test:types & npm run test:browser",
 		"test:browser": "wtr test/*.test.{js,jsx}",
 		"test:types": "tsc -p test/",
