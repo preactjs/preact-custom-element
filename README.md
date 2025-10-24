@@ -103,6 +103,7 @@ register(TextSelection, 'text-selection', [], { shadow: true });
     <span slot="heading">My Heading</span>
     <span slot="content">Some content goes here.</span>
 </text-section>
+```
 
 ### Declarative Shadow DOM (serializable option)
 
@@ -114,13 +115,10 @@ register(MyComponent, 'my-element', [], {
     serializable: true 
 });
 
-// Usage with getHTML() for SSR
 const el = document.querySelector('my-element');
 const html = el.getHTML({ serializableShadowRoots: true });
 
-// Test serializable shadow root
-console.log(el.shadowRoot.serializable); // true
-```
+console.log(el.shadowRoot.serializable);
 ```
 
 ### Static Properties
