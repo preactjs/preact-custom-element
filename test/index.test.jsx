@@ -421,4 +421,20 @@ describe('web components', () => {
 			'<h1>Light DOM Children</h1><div><slot><p>Child 1</p><p>Child 2</p></slot></div>'
 		);
 	});
+
+	it('supports the `serializable` option', async () => {
+		function SerializableComponent() {
+			return <div className="serializable-child">Serializable Shadow DOM</div>;
+		}
+
+		registerElement(SerializableComponent, 'x-serializable', [], {
+			shadow: true,
+			serializable: true,
+		});
+
+		root.innerHTML = `<x-serializable></x-serializable>`;
+
+		const el = document.querySelector('x-serializable');
+		assert.isTrue(el.shadowRoot.serializable);
+	});
 });
