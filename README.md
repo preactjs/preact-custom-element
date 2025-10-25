@@ -107,7 +107,7 @@ register(TextSelection, 'text-selection', [], { shadow: true });
 
 ### `serializable` option
 
-The `serializable` option is set, the shadow root may be serialized.
+If the `serializable` option is set, the shadow root may be serialized.
 
 ```js
 register(MyComponent, 'my-element', [], { 
