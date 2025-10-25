@@ -17,7 +17,7 @@ const Greeting = ({ name = 'World' }) => (
 register(Greeting, 'x-greeting', ['name'], { shadow: true, mode: 'open', adoptedStyleSheets: [], serializable: true });
 //          ^            ^           ^             ^               ^            ^                    ^
 //          |      HTML tag name     |       use shadow-dom        |    use adoptedStyleSheets     |
-//   Component definition      Observed attributes     Encapsulation mode for the shadow DOM tree   Enable declarative shadow DOM
+//   Component definition      Observed attributes     Encapsulation mode for the shadow DOM tree   shadow root may be serialized
 ```
 
 > _**\* Note:** as per the [Custom Elements specification](https://html.spec.whatwg.org/multipage/custom-elements.html#valid-custom-element-name), the tag name must contain a hyphen._
@@ -81,7 +81,7 @@ register(FullName, 'full-name');
 
 ### Passing slots as props
 
-The `register()` function also accepts an optional fourth parameter, an options bag. At present, it allows you to opt-in to using shadow DOM for your custom element by setting the `shadow` property to `true`, and if so, you can also specify the encapsulation mode with `mode`, which can be either `'open'` or `'closed'`. Additionally, you can enable declarative shadow DOM by setting `serializable` to `true`, which is useful for server-side rendering scenarios.
+The `register()` function also accepts an optional fourth parameter, an options bag. At present, it allows you to opt-in to using shadow DOM for your custom element by setting the `shadow` property to `true`, and if so, you can also specify the encapsulation mode with `mode`, which can be either `'open'` or `'closed'`. Additionally, the shadow DOM may be serialized by setting `serializable` to `true`, which is useful for server-side rendering scenarios.
 
 When using shadow DOM, you can make use of named `<slot>` elements in your component to forward the custom element's children into specific places in the shadow tree.
 
@@ -105,9 +105,9 @@ register(TextSelection, 'text-selection', [], { shadow: true });
 </text-section>
 ```
 
-### Declarative Shadow DOM (serializable option)
+### `serializable` option
 
-The `serializable` option enables declarative shadow DOM for server-side rendering:
+The `serializable` option is set, the shadow root may be serialized.
 
 ```js
 register(MyComponent, 'my-element', [], { 
