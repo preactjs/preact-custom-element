@@ -29,6 +29,229 @@ describe('web components', () => {
 		document.body.removeChild(root);
 	});
 
+	describe('options bag', () => {
+		it('supports `shadow`', () => {
+			function ShadowDom() {
+				return <div class="shadow-child">Shadow DOM</div>;
+			}
+
+			registerElement(ShadowDom, 'x-shadowdom', [], { shadow: true });
+			const el = document.createElement('x-shadowdom');
+			root.appendChild(el);
+
+			const shadowRoot = el.shadowRoot;
+			assert.isTrue(!!shadowRoot);
+		});
+
+		it('supports `mode: "open"`', () => {
+			function ShadowDomOpen() {
+				return <div class="shadow-child">Shadow DOM Open</div>;
+			}
+
+			registerElement(ShadowDomOpen, 'x-shadowdom-open', [], {
+				shadow: true,
+				mode: 'open',
+			});
+
+			const el = document.createElement('x-shadowdom-open');
+			root.appendChild(el);
+
+			const shadowRoot = el.shadowRoot;
+			assert.isTrue(!!shadowRoot);
+
+			const child = shadowRoot.querySelector('.shadow-child');
+			assert.isTrue(!!child);
+			assert.equal(child.textContent, 'Shadow DOM Open');
+		});
+
+		it('supports `mode: "closed"`', () => {
+			function ShadowDomClosed() {
+				return <div class="shadow-child">Shadow DOM Closed</div>;
+			}
+
+			registerElement(ShadowDomClosed, 'x-shadowdom-closed', [], {
+				shadow: true,
+				mode: 'closed',
+			});
+
+			const el = document.createElement('x-shadowdom-closed');
+			root.appendChild(el);
+
+			assert.isTrue(el.shadowRoot === null);
+		});
+
+		it('supports `adoptedStyleSheets`', () => {
+			function AdoptedStyleSheets() {
+				return <div class="styled-child">Adopted Style Sheets</div>;
+			}
+
+			const sheet = new CSSStyleSheet();
+			sheet.replaceSync('.styled-child { color: red; }');
+
+			registerElement(AdoptedStyleSheets, 'x-adopted-style-sheets', [], {
+				shadow: true,
+				adoptedStyleSheets: [sheet],
+			});
+
+			root.innerHTML = `<x-adopted-style-sheets></x-adopted-style-sheets>`;
+
+			const child = document
+				.querySelector('x-adopted-style-sheets')
+				.shadowRoot.querySelector('.styled-child');
+
+			const style = getComputedStyle(child);
+			assert.equal(style.color, 'rgb(255, 0, 0)');
+		});
+
+		it('supports `serializable`', async () => {
+			function SerializableComponent() {
+				return <div>Serializable Shadow DOM</div>;
+			}
+
+			function NonSerializableComponent() {
+				return <div>Non-serializable Shadow DOM</div>;
+			}
+
+			registerElement(SerializableComponent, 'x-serializable', [], {
+				shadow: true,
+				serializable: true,
+			});
+
+			registerElement(NonSerializableComponent, 'x-non-serializable', [], {
+				shadow: true,
+			});
+
+			root.innerHTML = `
+				<x-serializable></x-serializable>
+				<x-non-serializable></x-non-serializable>
+			`;
+
+			const serializableEl = document.querySelector('x-serializable');
+			const nonSerializableEl = document.querySelector('x-non-serializable');
+
+			assert.isTrue(serializableEl.shadowRoot.serializable);
+			assert.isFalse(nonSerializableEl.shadowRoot.serializable);
+
+			const serializableHtml = serializableEl.getHTML({
+				serializableShadowRoots: true,
+			});
+			const nonSerializableHtml = nonSerializableEl.getHTML({
+				serializableShadowRoots: true,
+			});
+
+			assert.equal(
+				serializableHtml,
+				'<template shadowrootmode="open" shadowrootserializable=""><div>Serializable Shadow DOM</div></template>'
+			);
+			assert.isEmpty(nonSerializableHtml);
+		});
+	});
+
+	describe('static properties', () => {
+		it('supports `tagName`', () => {
+			class TagNameClass extends Component {
+				static tagName = 'x-tag-name-class';
+
+				render() {
+					return <input name="foo" />;
+				}
+			}
+			registerElement(TagNameClass);
+
+			function TagNameFunction() {
+				return <input name="bar" />;
+			}
+			TagNameFunction.tagName = 'x-tag-name-function';
+			registerElement(TagNameFunction);
+
+			root.innerHTML = `
+				<div>
+					<x-tag-name-class></x-tag-name-class>
+					<x-tag-name-function></x-tag-name-function>
+				</div>
+			`;
+
+			assert.isTrue(!!document.querySelector('x-tag-name-class'));
+			assert.isTrue(!!document.querySelector('x-tag-name-function'));
+		});
+
+		it('supports `observedAttributes`', () => {
+			class ObservedAttributesClass extends Component {
+				static observedAttributes = ['name'];
+
+				render({ name }) {
+					return <input name={name} />;
+				}
+			}
+			registerElement(ObservedAttributesClass, 'x-observed-attributes-class');
+
+			function ObservedAttributesFunction({ name }) {
+				return <input name={name} />;
+			}
+			ObservedAttributesFunction.observedAttributes = ['name'];
+			registerElement(
+				ObservedAttributesFunction,
+				'x-observed-attributes-function'
+			);
+
+			const observedAttributesClassEl = document.createElement(
+				'x-observed-attributes-class'
+			);
+			const observedAttributesFunctionEl = document.createElement(
+				'x-observed-attributes-function'
+			);
+
+			observedAttributesClassEl.setAttribute('name', 'class-name');
+			observedAttributesFunctionEl.setAttribute('name', 'function-name');
+
+			root.appendChild(observedAttributesClassEl);
+			root.appendChild(observedAttributesFunctionEl);
+
+			assert.equal(
+				root.innerHTML,
+				`<x-observed-attributes-class name="class-name"><input name="class-name"></x-observed-attributes-class><x-observed-attributes-function name="function-name"><input name="function-name"></x-observed-attributes-function>`
+			);
+
+			observedAttributesClassEl.setAttribute('name', 'new-class-name');
+			observedAttributesFunctionEl.setAttribute('name', 'new-function-name');
+
+			assert.equal(
+				root.innerHTML,
+				`<x-observed-attributes-class name="new-class-name"><input name="new-class-name"></x-observed-attributes-class><x-observed-attributes-function name="new-function-name"><input name="new-function-name"></x-observed-attributes-function>`
+			);
+		});
+
+		it('supports `formAssociated`', () => {
+			class FormAssociatedClass extends Component {
+				static formAssociated = true;
+
+				render() {
+					return <input name="foo" />;
+				}
+			}
+			registerElement(FormAssociatedClass, 'x-form-associated-class', []);
+
+			function FormAssociatedFunction() {
+				return <input name="bar" />;
+			}
+			FormAssociatedFunction.formAssociated = true;
+			registerElement(FormAssociatedFunction, 'x-form-associated-function', []);
+
+			root.innerHTML = `
+				<form id="myForm">
+					<x-form-associated-class></x-form-associated-class>
+					<x-form-associated-function></x-form-associated-function>
+				</form>
+			`;
+
+			const myForm = document.getElementById('myForm');
+
+			// The `.elements` property of a form includes all form-associated elements
+			assert.equal(myForm.elements[0].tagName, 'X-FORM-ASSOCIATED-CLASS');
+			assert.equal(myForm.elements[2].tagName, 'X-FORM-ASSOCIATED-FUNCTION');
+		});
+	});
+
 	function Clock({ time }) {
 		return <span>{time}</span>;
 	}
@@ -285,93 +508,6 @@ describe('web components', () => {
 		assert.equal(getShadowHTML(), '<p>Active theme: sunny</p>');
 	});
 
-	it('renders element in shadow dom open mode', async () => {
-		function ShadowDomOpen() {
-			return <div className="shadow-child">Shadow DOM Open</div>;
-		}
-
-		registerElement(ShadowDomOpen, 'x-shadowdom-open', [], {
-			shadow: true,
-			mode: 'open',
-		});
-
-		const el = document.createElement('x-shadowdom-open');
-		root.appendChild(el);
-		const shadowRoot = el.shadowRoot;
-		assert.isTrue(!!shadowRoot);
-		const child = shadowRoot.querySelector('.shadow-child');
-		assert.isTrue(!!child);
-		assert.equal(child.textContent, 'Shadow DOM Open');
-	});
-
-	it('renders element in shadow dom closed mode', async () => {
-		function ShadowDomClosed() {
-			return <div className="shadow-child">Shadow DOM Closed</div>;
-		}
-
-		registerElement(ShadowDomClosed, 'x-shadowdom-closed', [], {
-			shadow: true,
-			mode: 'closed',
-		});
-
-		const el = document.createElement('x-shadowdom-closed');
-		root.appendChild(el);
-		assert.isTrue(el.shadowRoot === null);
-	});
-
-	it('supports the `formAssociated` property', async () => {
-		class FormAssociatedClass extends Component {
-			static formAssociated = true;
-
-			render() {
-				return <input name="foo" />;
-			}
-		}
-		registerElement(FormAssociatedClass, 'x-form-associated-class', []);
-
-		function FormAssociatedFunction() {
-			return <input name="bar" />;
-		}
-		FormAssociatedFunction.formAssociated = true;
-		registerElement(FormAssociatedFunction, 'x-form-associated-function', []);
-
-		root.innerHTML = `
-			<form id="myForm">
-				<x-form-associated-class></x-form-associated-class>
-				<x-form-associated-function></x-form-associated-function>
-			</form>
-		`;
-
-		const myForm = document.getElementById('myForm');
-
-		// The `.elements` property of a form includes all form-associated elements
-		assert.equal(myForm.elements[0].tagName, 'X-FORM-ASSOCIATED-CLASS');
-		assert.equal(myForm.elements[2].tagName, 'X-FORM-ASSOCIATED-FUNCTION');
-	});
-
-	it('supports the `adoptedStyleSheets` option', async () => {
-		function AdoptedStyleSheets() {
-			return <div className="styled-child">Adopted Style Sheets</div>;
-		}
-
-		const sheet = new CSSStyleSheet();
-		sheet.replaceSync('.styled-child { color: red; }');
-
-		registerElement(AdoptedStyleSheets, 'x-adopted-style-sheets', [], {
-			shadow: true,
-			adoptedStyleSheets: [sheet],
-		});
-
-		root.innerHTML = `<x-adopted-style-sheets></x-adopted-style-sheets>`;
-
-		const child = document
-			.querySelector('x-adopted-style-sheets')
-			.shadowRoot.querySelector('.styled-child');
-
-		const style = getComputedStyle(child);
-		assert.equal(style.color, 'rgb(255, 0, 0)');
-	});
-
 	it('supports controlling light DOM children', async () => {
 		function LightDomChildren({ children }) {
 			return (
@@ -420,48 +556,5 @@ describe('web components', () => {
 			document.querySelector('shadow-dom-children').shadowRoot.innerHTML,
 			'<h1>Light DOM Children</h1><div><slot><p>Child 1</p><p>Child 2</p></slot></div>'
 		);
-	});
-
-	it('supports the `serializable` option', async () => {
-		function SerializableComponent() {
-			return <div>Serializable Shadow DOM</div>;
-		}
-
-		function NonSerializableComponent() {
-			return <div>Non-serializable Shadow DOM</div>;
-		}
-
-		registerElement(SerializableComponent, 'x-serializable', [], {
-			shadow: true,
-			serializable: true,
-		});
-
-		registerElement(NonSerializableComponent, 'x-non-serializable', [], {
-			shadow: true,
-		});
-
-		root.innerHTML = `
-			<x-serializable></x-serializable>
-			<x-non-serializable></x-non-serializable>
-		`;
-
-		const serializableEl = document.querySelector('x-serializable');
-		const nonSerializableEl = document.querySelector('x-non-serializable');
-
-		assert.isTrue(serializableEl.shadowRoot.serializable);
-		assert.isFalse(nonSerializableEl.shadowRoot.serializable);
-
-		const serializableHtml = serializableEl.getHTML({
-			serializableShadowRoots: true,
-		});
-		const nonSerializableHtml = nonSerializableEl.getHTML({
-			serializableShadowRoots: true,
-		});
-
-		assert.equal(
-			serializableHtml,
-			'<template shadowrootmode="open" shadowrootserializable=""><div>Serializable Shadow DOM</div></template>'
-		);
-		assert.isEmpty(nonSerializableHtml);
 	});
 });
