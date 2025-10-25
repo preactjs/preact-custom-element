@@ -424,19 +424,11 @@ describe('web components', () => {
 
 	it('supports the `serializable` option', async () => {
 		function SerializableComponent() {
-			return <div className="serializable-child">Serializable Shadow DOM</div>;
+			return <div>Serializable Shadow DOM</div>;
 		}
 
 		function NonSerializableComponent() {
-			return (
-				<div className="non-serializable-child">
-					Non-serializable Shadow DOM
-				</div>
-			);
-		}
-
-		function UndefinedSerializableComponent() {
-			return <div className="undefined-child">Undefined Serializable</div>;
+			return <div>Non-serializable Shadow DOM</div>;
 		}
 
 		registerElement(SerializableComponent, 'x-serializable', [], {
@@ -448,47 +440,28 @@ describe('web components', () => {
 			shadow: true,
 		});
 
-		registerElement(
-			UndefinedSerializableComponent,
-			'x-serializable-undefined',
-			[],
-			{
-				shadow: true,
-				serializable: undefined,
-			}
-		);
-
 		root.innerHTML = `
 			<x-serializable></x-serializable>
 			<x-non-serializable></x-non-serializable>
-			<x-serializable-undefined></x-serializable-undefined>
 		`;
 
 		const serializableEl = document.querySelector('x-serializable');
 		const nonSerializableEl = document.querySelector('x-non-serializable');
-		const undefinedEl = document.querySelector('x-serializable-undefined');
 
-		// The serializable option sets the shadowRoot.serializable property,
-		// which enables declarative shadow DOM for server-side rendering
 		assert.isTrue(serializableEl.shadowRoot.serializable);
 		assert.isFalse(nonSerializableEl.shadowRoot.serializable);
-		assert.isFalse(undefinedEl.shadowRoot.serializable);
 
-		// Test getHTML() if available (declarative shadow DOM support)
-		if (typeof serializableEl.getHTML === 'function') {
-			const serializableHtml = serializableEl.getHTML({
-				serializableShadowRoots: true,
-			});
-			const nonSerializableHtml = nonSerializableEl.getHTML({
-				serializableShadowRoots: true,
-			});
+		const serializableHtml = serializableEl.getHTML({
+			serializableShadowRoots: true,
+		});
+		const nonSerializableHtml = nonSerializableEl.getHTML({
+			serializableShadowRoots: true,
+		});
 
-			// getHTML() is available - verify it includes shadow DOM serialization
-			if (serializableHtml) {
-				assert.include(serializableHtml, 'shadowrootmode="open"');
-				assert.include(serializableHtml, 'shadowrootserializable');
-				assert.notInclude(nonSerializableHtml, 'shadowrootserializable');
-			}
-		}
+		assert.equal(
+			serializableHtml,
+			'<template shadowrootmode="open" shadowrootserializable=""><div>Serializable Shadow DOM</div></template>'
+		);
+		assert.isEmpty(nonSerializableHtml);
 	});
 });

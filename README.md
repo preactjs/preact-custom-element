@@ -15,9 +15,9 @@ const Greeting = ({ name = 'World' }) => (
 );
 
 register(Greeting, 'x-greeting', ['name'], { shadow: true, mode: 'open', adoptedStyleSheets: [], serializable: true });
-//          ^            ^           ^             ^               ^            ^                    ^
-//          |      HTML tag name     |       use shadow-dom        |    use adoptedStyleSheets     |
-//   Component definition      Observed attributes     Encapsulation mode for the shadow DOM tree   shadow root may be serialized
+//          ^            ^           ^             ^               ^            ^                            ^
+//          |      HTML tag name     |       use shadow-dom        |    use adoptedStyleSheets               |
+//   Component definition      Observed attributes     Encapsulation mode for the shadow DOM tree     Root is serializable
 ```
 
 > _**\* Note:** as per the [Custom Elements specification](https://html.spec.whatwg.org/multipage/custom-elements.html#valid-custom-element-name), the tag name must contain a hyphen._
@@ -81,7 +81,7 @@ register(FullName, 'full-name');
 
 ### Passing slots as props
 
-The `register()` function also accepts an optional fourth parameter, an options bag. At present, it allows you to opt-in to using shadow DOM for your custom element by setting the `shadow` property to `true`, and if so, you can also specify the encapsulation mode with `mode`, which can be either `'open'` or `'closed'`. Additionally, the shadow DOM may be serialized by setting `serializable` to `true`, which is useful for server-side rendering scenarios.
+The `register()` function also accepts an optional fourth parameter, an options bag. At present, it allows you to opt-in to using shadow DOM for your custom element by setting the `shadow` property to `true`, and if so, you can also specify the encapsulation mode with `mode`, which can be either `'open'` or `'closed'`. Additionally, you may mark the shadow root as being serializable with the boolean `serializable` property.
 
 When using shadow DOM, you can make use of named `<slot>` elements in your component to forward the custom element's children into specific places in the shadow tree.
 
@@ -103,22 +103,6 @@ register(TextSelection, 'text-selection', [], { shadow: true });
     <span slot="heading">My Heading</span>
     <span slot="content">Some content goes here.</span>
 </text-section>
-```
-
-### `serializable` option
-
-If the `serializable` option is set, the shadow root may be serialized.
-
-```js
-register(MyComponent, 'my-element', [], { 
-    shadow: true, 
-    serializable: true 
-});
-
-const el = document.querySelector('my-element');
-const html = el.getHTML({ serializableShadowRoots: true });
-
-console.log(el.shadowRoot.serializable);
 ```
 
 ### Static Properties
