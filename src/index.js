@@ -119,15 +119,6 @@ function connectedCallback(options) {
 }
 
 /**
- * Camel-cases a string
- * @param {string} str The string to transform to camelCase
- * @returns camel case version of the string
- */
-function toCamelCase(str) {
-	return str.replace(/-(\w)/g, (_, c) => (c ? c.toUpperCase() : ''));
-}
-
-/**
  * Changed whenver an attribute of the HTML element changed
  * @this {PreactCustomElement}
  * @param {string} name The attribute name
@@ -143,7 +134,6 @@ function attributeChangedCallback(name, oldValue, newValue) {
 	newValue = newValue == null ? undefined : newValue;
 	const props = {};
 	props[name] = newValue;
-	props[toCamelCase(name)] = newValue;
 	this._vdom = cloneElement(this._vdom, props);
 	render(this._vdom, this._root);
 }
@@ -192,7 +182,6 @@ function toVdom(element, nodeName, options) {
 	for (i = a.length; i--; ) {
 		if (a[i].name !== 'slot') {
 			props[a[i].name] = a[i].value;
-			props[toCamelCase(a[i].name)] = a[i].value;
 		}
 	}
 
