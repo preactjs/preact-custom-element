@@ -12,8 +12,8 @@
 		"build": "microbundle -f cjs,es,umd --no-generateTypes",
 		"lint": "eslint src/*.js",
 		"test": "npm run test:types & npm run test:browser",
-		"test:browser": "wtr test/*.test.{js,jsx}",
-		"test:types": "tsc -p test/",
+		"test:browser": "wtr test/browser/*.test.{js,jsx}",
+		"test:types": "tsc -p test/types/",
 		"prettier": "prettier **/*.{js,jsx} --write",
 		"prepublishOnly": "npm run build && npm run lint && npm run test"
 	},
