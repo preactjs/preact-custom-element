@@ -485,7 +485,7 @@ describe('web components', () => {
 
 	registerElement(Parent, 'x-parent', ['theme'], { shadow: true });
 
-	it('passes context over custom element boundaries', async () => {
+	it('passes context over custom element boundaries', () => {
 		const el = document.createElement('x-parent');
 
 		const noSlot = document.createElement('x-display-theme');
@@ -508,7 +508,7 @@ describe('web components', () => {
 		assert.equal(getShadowHTML(), '<p>Active theme: sunny</p>');
 	});
 
-	it('supports controlling light DOM children', async () => {
+	it('supports controlling light DOM children', () => {
 		function LightDomChildren({ children }) {
 			return (
 				<Fragment>
