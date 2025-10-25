@@ -344,5 +344,45 @@ describe('web components', () => {
 			});
 			assert.equal(getShadowHTML(), '<p>Active theme: sunny</p>');
 		});
+
+		it.only('passes context over light DOM custom element boundaries', async () => {
+			const Theme = createContext('light');
+
+			function DisplayTheme() {
+				const theme = useContext(Theme);
+				return <p>Active theme: {theme}</p>;
+			}
+
+			function Parent({ children, theme = 'dark' }) {
+				return (
+					<Theme.Provider value={theme}>
+						<div class="children">{children}</div>
+					</Theme.Provider>
+				);
+			}
+
+			registerElement(Parent, 'x-light-dom-parent', ['theme']);
+			registerElement(DisplayTheme, 'x-light-dom-child', []);
+
+			const el = document.createElement('x-light-dom-parent');
+
+			const noSlot = document.createElement('x-light-dom-child');
+			el.appendChild(noSlot);
+
+			root.appendChild(el);
+			assert.equal(
+				root.innerHTML,
+				'<x-light-dom-parent><div class="children"><x-light-dom-child><p>Active theme: dark</p></x-light-dom-child></div></x-light-dom-parent>'
+			);
+
+			// Trigger context update
+			act(() => {
+				el.setAttribute('theme', 'sunny');
+			});
+			assert.equal(
+				root.innerHTML,
+				'<x-light-dom-parent><div class="children"><x-light-dom-child><p>Active theme: sunny</p></x-light-dom-child></div></x-light-dom-parent>'
+			);
+		});
 	});
 });
