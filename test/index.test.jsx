@@ -421,4 +421,47 @@ describe('web components', () => {
 			'<h1>Light DOM Children</h1><div><slot><p>Child 1</p><p>Child 2</p></slot></div>'
 		);
 	});
+
+	it('supports the `serializable` option', async () => {
+		function SerializableComponent() {
+			return <div>Serializable Shadow DOM</div>;
+		}
+
+		function NonSerializableComponent() {
+			return <div>Non-serializable Shadow DOM</div>;
+		}
+
+		registerElement(SerializableComponent, 'x-serializable', [], {
+			shadow: true,
+			serializable: true,
+		});
+
+		registerElement(NonSerializableComponent, 'x-non-serializable', [], {
+			shadow: true,
+		});
+
+		root.innerHTML = `
+			<x-serializable></x-serializable>
+			<x-non-serializable></x-non-serializable>
+		`;
+
+		const serializableEl = document.querySelector('x-serializable');
+		const nonSerializableEl = document.querySelector('x-non-serializable');
+
+		assert.isTrue(serializableEl.shadowRoot.serializable);
+		assert.isFalse(nonSerializableEl.shadowRoot.serializable);
+
+		const serializableHtml = serializableEl.getHTML({
+			serializableShadowRoots: true,
+		});
+		const nonSerializableHtml = nonSerializableEl.getHTML({
+			serializableShadowRoots: true,
+		});
+
+		assert.equal(
+			serializableHtml,
+			'<template shadowrootmode="open" shadowrootserializable=""><div>Serializable Shadow DOM</div></template>'
+		);
+		assert.isEmpty(nonSerializableHtml);
+	});
 });

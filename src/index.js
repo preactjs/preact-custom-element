@@ -15,7 +15,10 @@ export default function register(Component, tagName, propNames, options) {
 		inst._vdomComponent = Component;
 
 		if (options && options.shadow) {
-			inst._root = inst.attachShadow({ mode: options.mode || 'open' });
+			inst._root = inst.attachShadow({
+				mode: options.mode || 'open',
+				serializable: options.serializable ?? false,
+			});
 
 			if (options.adoptedStyleSheets) {
 				inst._root.adoptedStyleSheets = options.adoptedStyleSheets;

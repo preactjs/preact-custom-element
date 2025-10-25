@@ -14,10 +14,10 @@ const Greeting = ({ name = 'World' }) => (
   <p>Hello, {name}!</p>
 );
 
-register(Greeting, 'x-greeting', ['name'], { shadow: true, mode: 'open', adoptedStyleSheets: [] });
-//          ^            ^           ^             ^               ^            ^
-//          |      HTML tag name     |       use shadow-dom        |    use adoptedStyleSheets
-//   Component definition      Observed attributes     Encapsulation mode for the shadow DOM tree
+register(Greeting, 'x-greeting', ['name'], { shadow: true, mode: 'open', adoptedStyleSheets: [], serializable: true });
+//          ^            ^           ^             ^               ^            ^                            ^
+//          |      HTML tag name     |       use shadow-dom        |    use adoptedStyleSheets               |
+//   Component definition      Observed attributes     Encapsulation mode for the shadow DOM tree     Root is serializable
 ```
 
 > _**\* Note:** as per the [Custom Elements specification](https://html.spec.whatwg.org/multipage/custom-elements.html#valid-custom-element-name), the tag name must contain a hyphen._
@@ -81,7 +81,7 @@ register(FullName, 'full-name');
 
 ### Passing slots as props
 
-The `register()` function also accepts an optional fourth parameter, an options bag. At present, it allows you to opt-in to using shadow DOM for your custom element by setting the `shadow` property to `true`, and if so, you can also specify the encapsulation mode with `mode`, which can be either `'open'` or `'closed'`.
+The `register()` function also accepts an optional fourth parameter, an options bag. At present, it allows you to opt-in to using shadow DOM for your custom element by setting the `shadow` property to `true`, and if so, you can also specify the encapsulation mode with `mode`, which can be either `'open'` or `'closed'`. Additionally, you may mark the shadow root as being serializable with the boolean `serializable` property.
 
 When using shadow DOM, you can make use of named `<slot>` elements in your component to forward the custom element's children into specific places in the shadow tree.
 
