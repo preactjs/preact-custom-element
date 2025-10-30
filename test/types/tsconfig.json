@@ -9,5 +9,4 @@
     "jsxFactory": "h",
     "jsxFragmentFactory": "Fragment",
   },
-	"include": ["./types.test.tsx"],
 }

@@ -1,5 +1,5 @@
 import { h } from 'preact';
-import registerElement from '../src/index';
+import registerElement from '../../src/index';
 
 interface AppProps {
 	name: string;
