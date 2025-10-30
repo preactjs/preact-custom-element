@@ -4,18 +4,6 @@ import { useContext } from 'preact/hooks';
 import { act } from 'preact/test-utils';
 import registerElement from '../../src/index';
 
-/** @param {string} name */
-function createTestElement(name) {
-	const el = document.createElement(name);
-	const child1 = document.createElement('p');
-	child1.textContent = 'Child 1';
-	const child2 = document.createElement('p');
-	child2.textContent = 'Child 2';
-	el.appendChild(child1);
-	el.appendChild(child2);
-	return el;
-}
-
 describe('web components', () => {
 	/** @type {HTMLDivElement} */
 	let root;
@@ -29,13 +17,13 @@ describe('web components', () => {
 		document.body.removeChild(root);
 	});
 
-	function Clock({ time }) {
-		return <span>{time}</span>;
-	}
-
-	registerElement(Clock, 'x-clock', ['time']);
-
 	it('renders ok, updates on attr change', () => {
+		function Clock({ time }) {
+			return <span>{time}</span>;
+		}
+
+		registerElement(Clock, 'x-clock', ['time']);
+
 		const el = document.createElement('x-clock');
 		el.setAttribute('time', '10:28:57 PM');
 
@@ -52,14 +40,14 @@ describe('web components', () => {
 		);
 	});
 
-	function NullProps({ size = 'md' }) {
-		return <div>{size.toUpperCase()}</div>;
-	}
-
-	registerElement(NullProps, 'x-null-props', ['size'], { shadow: true });
-
 	// #50
 	it('remove attributes without crashing', () => {
+		function NullProps({ size = 'md' }) {
+			return <div>{size.toUpperCase()}</div>;
+		}
+
+		registerElement(NullProps, 'x-null-props', ['size'], { shadow: true });
+
 		const el = document.createElement('x-null-props');
 		assert.doesNotThrow(() => (el.size = 'foo'));
 		root.appendChild(el);
@@ -69,7 +57,13 @@ describe('web components', () => {
 
 	describe('DOM properties', () => {
 		it('passes property changes to props', () => {
-			const el = document.createElement('x-clock');
+			function Clock({ time }) {
+				return <span>{time}</span>;
+			}
+
+			registerElement(Clock, 'x-clock-props', ['time']);
+
+			const el = document.createElement('x-clock-props');
 
 			el.time = '10:28:57 PM';
 			assert.equal(el.time, '10:28:57 PM');
@@ -77,7 +71,7 @@ describe('web components', () => {
 			root.appendChild(el);
 			assert.equal(
 				root.innerHTML,
-				'<x-clock time="10:28:57 PM"><span>10:28:57 PM</span></x-clock>'
+				'<x-clock-props time="10:28:57 PM"><span>10:28:57 PM</span></x-clock-props>'
 			);
 
 			el.time = '11:01:10 AM';
@@ -85,7 +79,7 @@ describe('web components', () => {
 
 			assert.equal(
 				root.innerHTML,
-				'<x-clock time="11:01:10 AM"><span>11:01:10 AM</span></x-clock>'
+				'<x-clock-props time="11:01:10 AM"><span>11:01:10 AM</span></x-clock-props>'
 			);
 		});
 
@@ -210,40 +204,54 @@ describe('web components', () => {
 		);
 	});
 
-	const kebabName = 'custom-date-long-name';
-	const camelName = 'customDateLongName';
-	const lowerName = camelName.toLowerCase();
-	function PropNameTransform(props) {
-		return (
-			<span>
-				{props[kebabName]} {props[lowerName]} {props[camelName]}
-			</span>
-		);
-	}
-	registerElement(PropNameTransform, 'x-prop-name-transform', [
-		kebabName,
-		camelName,
-	]);
+	describe('attribute/property name transformation', () => {
+		const kebabName = 'custom-date-long-name';
+		const camelName = 'customDateLongName';
+		const lowerName = camelName.toLowerCase();
+		function PropNameTransform(props) {
+			return (
+				<span>
+					{props[kebabName]} {props[lowerName]} {props[camelName]}
+				</span>
+			);
+		}
+		registerElement(PropNameTransform, 'x-prop-name-transform', [
+			kebabName,
+			camelName,
+		]);
 
-	it('handles kebab-case attributes with passthrough', () => {
-		const el = document.createElement('x-prop-name-transform');
-		el.setAttribute(kebabName, '11/11/2011');
-		el.setAttribute(camelName, 'pretended to be camel');
+		it('handles kebab-case attributes with passthrough', () => {
+			const el = document.createElement('x-prop-name-transform');
+			el.setAttribute(kebabName, '11/11/2011');
+			el.setAttribute(camelName, 'pretended to be camel');
 
-		root.appendChild(el);
-		assert.equal(
-			root.innerHTML,
-			`<x-prop-name-transform ${kebabName}="11/11/2011" ${lowerName}="pretended to be camel"><span>11/11/2011 pretended to be camel 11/11/2011</span></x-prop-name-transform>`
-		);
+			root.appendChild(el);
+			assert.equal(
+				root.innerHTML,
+				`<x-prop-name-transform ${kebabName}="11/11/2011" ${lowerName}="pretended to be camel"><span>11/11/2011 pretended to be camel 11/11/2011</span></x-prop-name-transform>`
+			);
 
-		el.setAttribute(kebabName, '01/01/2001');
-		assert.equal(
-			root.innerHTML,
-			`<x-prop-name-transform ${kebabName}="01/01/2001" ${lowerName}="pretended to be camel"><span>01/01/2001 pretended to be camel 01/01/2001</span></x-prop-name-transform>`
-		);
+			el.setAttribute(kebabName, '01/01/2001');
+			assert.equal(
+				root.innerHTML,
+				`<x-prop-name-transform ${kebabName}="01/01/2001" ${lowerName}="pretended to be camel"><span>01/01/2001 pretended to be camel 01/01/2001</span></x-prop-name-transform>`
+			);
+		});
 	});
 
 	describe('children', () => {
+		/** @param {string} name */
+		function createTestElement(name) {
+			const el = document.createElement(name);
+			const child1 = document.createElement('p');
+			child1.textContent = 'Child 1';
+			const child2 = document.createElement('p');
+			child2.textContent = 'Child 2';
+			el.appendChild(child1);
+			el.appendChild(child2);
+			return el;
+		}
+
 		it('supports controlling light DOM children', () => {
 			function LightDomChildren({ children }) {
 				return (
