@@ -40,10 +40,7 @@ export default function register(Component, tagName, propNames, options) {
 	/**
 	 * @type {string[]}
 	 */
-	propNames =
-		propNames ||
-		Component.observedAttributes ||
-		Object.keys(Component.propTypes || {});
+	propNames = propNames || Component.observedAttributes || [];
 	PreactElement.observedAttributes = propNames;
 
 	if (Component.formAssociated) {

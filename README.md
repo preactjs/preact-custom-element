@@ -63,22 +63,6 @@ class Greeting extends Component {
 register(Greeting);
 ```
 
-If no `observedAttributes` are specified, they will be inferred from the keys of `propTypes` if present on the Component:
-
-```js
-// Other option: use PropTypes:
-function FullName({ first, last }) {
-  return <span>{first} {last}</span>
-}
-
-FullName.propTypes = {
-  first: Object,   // you can use PropTypes, or this
-  last: Object     // trick to define untyped props.
-};
-
-register(FullName, 'full-name');
-```
-
 ### Passing slots as props
 
 The `register()` function also accepts an optional fourth parameter, an options bag. At present, it allows you to opt-in to using shadow DOM for your custom element by setting the `shadow` property to `true`, and if so, you can also specify the encapsulation mode with `mode`, which can be either `'open'` or `'closed'`. Additionally, you may mark the shadow root as being serializable with the boolean `serializable` property.
