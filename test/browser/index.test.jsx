@@ -280,11 +280,40 @@ describe('web components', () => {
 			);
 		});
 
+		it('supports controlling light DOM with other custom elements', () => {
+			function Parent({ children }) {
+				return (
+					<Fragment>
+						<h1>Light DOM Children</h1>
+						<div>{children}</div>
+					</Fragment>
+				);
+			}
+
+			function Child() {
+				return <p>Child</p>;
+			}
+
+			registerElement(Parent, 'light-dom-children-parent', []);
+			registerElement(Child, 'light-dom-children-child', []);
+
+			const parent = document.createElement('light-dom-children-parent');
+			const child = document.createElement('light-dom-children-child');
+
+			parent.appendChild(child);
+			root.appendChild(parent);
+
+			assert.equal(
+				document.querySelector('light-dom-children-parent').innerHTML,
+				'<h1>Light DOM Children</h1><div><light-dom-children-child><p>Child</p></light-dom-children-child></div>'
+			);
+		});
+
 		it('supports controlling shadow DOM children', () => {
 			function ShadowDomChildren({ children }) {
 				return (
 					<Fragment>
-						<h1>Light DOM Children</h1>
+						<h1>Shadow DOM Children</h1>
 						<div>{children}</div>
 					</Fragment>
 				);
@@ -298,8 +327,45 @@ describe('web components', () => {
 
 			assert.equal(
 				document.querySelector('shadow-dom-children').shadowRoot.innerHTML,
-				'<h1>Light DOM Children</h1><div><slot><p>Child 1</p><p>Child 2</p></slot></div>'
+				'<h1>Shadow DOM Children</h1><div><slot><p>Child 1</p><p>Child 2</p></slot></div>'
 			);
+		});
+
+		it('supports controlling shadow DOM with other custom elements', () => {
+			function Parent({ children }) {
+				return (
+					<Fragment>
+						<h1>Shadow DOM Children</h1>
+						<div>{children}</div>
+					</Fragment>
+				);
+			}
+
+			function Child() {
+				return <p>Child</p>;
+			}
+
+			registerElement(Parent, 'shadow-dom-children-parent', [], {
+				shadow: true,
+			});
+			registerElement(Child, 'shadow-dom-children-child', [], {
+				shadow: true,
+			});
+
+			const parent = document.createElement('shadow-dom-children-parent');
+			const child = document.createElement('shadow-dom-children-child');
+
+			parent.appendChild(child);
+			root.appendChild(parent);
+
+			const getShadowHTML = (selector) =>
+				document.querySelector(selector).shadowRoot.innerHTML;
+
+			assert.equal(
+				getShadowHTML('shadow-dom-children-parent'),
+				'<h1>Shadow DOM Children</h1><div><slot><shadow-dom-children-child></shadow-dom-children-child></slot></div>'
+			);
+			assert.equal(getShadowHTML('shadow-dom-children-child'), '<p>Child</p>');
 		});
 	});
 
