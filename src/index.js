@@ -1,4 +1,4 @@
-import { h, cloneElement, render, hydrate, Fragment } from 'preact';
+import { h, cloneElement, render, hydrate } from 'preact';
 
 /**
  * @typedef {import('./internal.d.ts').PreactCustomElement} PreactCustomElement
@@ -177,8 +177,7 @@ function Slot(props, context) {
 			}
 		}
 	};
-	const { useFragment, ...rest } = props;
-	return h(useFragment ? Fragment : 'slot', { ...rest, ref });
+	return h('slot', { ...props, ref });
 }
 
 function toVdom(element, nodeName, options) {
@@ -210,9 +209,8 @@ function toVdom(element, nodeName, options) {
 	const shadow = !!(options && options.shadow);
 
 	// Only wrap the topmost node with a slot
-	const wrappedChildren = nodeName
-		? h(Slot, { useFragment: !shadow }, children)
-		: children;
+	const wrappedChildren =
+		nodeName && shadow ? h(Slot, null, children) : children;
 
 	if (!shadow && nodeName) {
 		element.innerHTML = '';
