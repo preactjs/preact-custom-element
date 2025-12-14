@@ -1,5 +1,12 @@
 import { AnyComponent } from 'preact';
 
+type StaticProperties<P> = {
+	tagName?: string;
+	observedAttributes?: (keyof P)[];
+	propTypes?: Record<keyof P, any>;
+	formAssociated?: boolean;
+};
+
 type Options =
 	| {
 			shadow: false;
@@ -41,7 +48,7 @@ type Options =
  * ```
  */
 declare function register<P = {}, S = {}>(
-	Component: AnyComponent<P, S>,
+	Component: AnyComponent<P, S> & StaticProperties<P>,
 	tagName?: string,
 	propNames?: (keyof P)[],
 	options?: Options
