@@ -24,7 +24,10 @@
 				"version": "16.8"
 			}
 		},
-		"ignorePatterns": ["*.ts", "*.tsx"],
+		"ignorePatterns": [
+			"*.ts",
+			"*.tsx"
+		],
 		"rules": {
 			"brace-style": "off",
 			"jest/expect-expect": "off",

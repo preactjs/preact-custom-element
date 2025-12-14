@@ -10,9 +10,7 @@ Any Preact component can be registered as a custom element simply by importing `
 ```javascript
 import register from 'preact-custom-element';
 
-const Greeting = ({ name = 'World' }) => (
-  <p>Hello, {name}!</p>
-);
+const Greeting = ({ name = 'World' }) => <p>Hello, {name}!</p>;
 
 register(Greeting, 'x-greeting', ['name'], { shadow: true, mode: 'open', adoptedStyleSheets: [], serializable: true });
 //          ^            ^           ^             ^               ^            ^                            ^
@@ -20,7 +18,7 @@ register(Greeting, 'x-greeting', ['name'], { shadow: true, mode: 'open', adopted
 //   Component definition      Observed attributes     Encapsulation mode for the shadow DOM tree     Root is serializable
 ```
 
-> _**\* Note:** as per the [Custom Elements specification](https://html.spec.whatwg.org/multipage/custom-elements.html#valid-custom-element-name), the tag name must contain a hyphen._
+> _**Note:** as per the [Custom Elements specification](https://html.spec.whatwg.org/multipage/custom-elements.html#valid-custom-element-name), the tag name must contain a hyphen._
 
 Use the new tag name in HTML, attribute keys and values will be passed in as props:
 
@@ -50,15 +48,15 @@ import register from 'preact-custom-element';
 
 // <x-greeting name="Bo"></x-greeting>
 class Greeting extends Component {
-  // Register as <x-greeting>:
-  static tagName = 'x-greeting';
+	// Register as <x-greeting>:
+	static tagName = 'x-greeting';
 
-  // Track these attributes:
-  static observedAttributes = ['name'];
+	// Track these attributes:
+	static observedAttributes = ['name'];
 
-  render({ name }) {
-    return <p>Hello, {name}!</p>;
-  }
+	render({ name }) {
+		return <p>Hello, {name}!</p>;
+	}
 }
 register(Greeting);
 ```
@@ -68,12 +66,16 @@ If no `observedAttributes` are specified, they will be inferred from the keys of
 ```js
 // Other option: use PropTypes:
 function FullName({ first, last }) {
-  return <span>{first} {last}</span>
+	return (
+		<span>
+			{first} {last}
+		</span>
+	);
 }
 
 FullName.propTypes = {
-  first: Object,   // you can use PropTypes, or this
-  last: Object     // trick to define untyped props.
+	first: Object, // you can use PropTypes, or this
+	last: Object,  // trick to define untyped props.
 };
 
 register(FullName, 'full-name');
@@ -87,12 +89,12 @@ When using shadow DOM, you can make use of named `<slot>` elements in your compo
 
 ```jsx
 function TextSection({ heading, content }) {
-    return (
-        <div>
-            <h2>{heading}</h2>
-            <p>{content}</p>
-        </div>
-    );
+	return (
+		<div>
+			<h2>{heading}</h2>
+			<p>{content}</p>
+		</div>
+	);
 }
 
 register(TextSelection, 'text-selection', [], { shadow: true });
@@ -100,8 +102,8 @@ register(TextSelection, 'text-selection', [], { shadow: true });
 
 ```html
 <text-section>
-    <span slot="heading">My Heading</span>
-    <span slot="content">Some content goes here.</span>
+	<span slot="heading">My Heading</span>
+	<span slot="content">Some content goes here.</span>
 </text-section>
 ```
 
