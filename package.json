@@ -10,11 +10,11 @@
 	"scripts": {
 		"prepare": "npx simple-git-hooks",
 		"build": "microbundle -f cjs,es,umd --no-generateTypes",
-		"lint": "eslint src/*.js",
 		"test": "npm run test:types & npm run test:browser",
 		"test:browser": "wtr test/browser/*.test.{js,jsx}",
 		"test:types": "tsc -p test/types/",
-		"prettier": "prettier **/*.{js,jsx} --write",
+		"lint": "eslint src/*.js",
+		"format": "prettier --write --ignore-path .gitignore '!README.md' .",
 		"prepublishOnly": "npm run build && npm run lint && npm run test"
 	},
 	"eslintConfig": {
@@ -24,7 +24,10 @@
 				"version": "16.8"
 			}
 		},
-		"ignorePatterns": ["*.ts", "*.tsx"],
+		"ignorePatterns": [
+			"*.ts",
+			"*.tsx"
+		],
 		"rules": {
 			"brace-style": "off",
 			"jest/expect-expect": "off",
