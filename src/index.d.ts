@@ -47,11 +47,9 @@ type Options =
  * const klass = register(PreactComponent, 'my-component');
  * ```
  */
-declare function register<P = {}, S = {}>(
+export default function register<P = {}, S = {}>(
 	Component: AnyComponent<P, S> & StaticProperties<P>,
 	tagName?: string,
 	propNames?: (keyof P)[],
 	options?: Options
 ): HTMLElement;
-
-export = register;

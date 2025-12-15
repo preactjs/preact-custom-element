@@ -5,7 +5,7 @@ import { h, cloneElement, render, hydrate } from 'preact';
  */
 
 /**
- * @type {import('./index.d.ts')}
+ * @type {import('./index.d.ts').default}
  */
 export default function register(Component, tagName, propNames, options) {
 	function PreactElement() {
