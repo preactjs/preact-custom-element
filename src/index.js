@@ -8,12 +8,7 @@ import { h, cloneElement, render, hydrate } from 'preact';
  * @type {import('./index.d.ts').default}
  */
 export default function register(Component, tagName, propNames, options) {
-	propNames ??= Component.observedAttributes || [];
-
 	class PreactElement extends HTMLElement {
-		static formAssociated = Component.formAssociated || false;
-		static observedAttributes = propNames;
-
 		constructor() {
 			super();
 
@@ -60,6 +55,11 @@ export default function register(Component, tagName, propNames, options) {
 			render((this._vdom = null), this._root);
 		}
 	}
+
+	propNames = propNames || Component.observedAttributes || [];
+	PreactElement.observedAttributes = propNames;
+
+	PreactElement.formAssociated = Component.formAssociated || false;
 
 	// Keep DOM properties and Preact props in sync
 	propNames.forEach((name) => {
