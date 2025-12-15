@@ -14,7 +14,7 @@
 	"scripts": {
 		"prepare": "npx simple-git-hooks",
 		"build": "mkdir -p dist && terser src/index.js -o dist/preact-custom-element.js --config-file terser-config.json",
-		"test": "npm run test:types & npm run test:browser",
+		"test": "npm run test:types && npm run test:browser",
 		"test:browser": "wtr test/browser/*.test.{js,jsx}",
 		"test:types": "tsc -p test/types/",
 		"lint": "eslint src/*.js",
