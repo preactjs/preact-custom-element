@@ -5,50 +5,61 @@ import { h, cloneElement, render, hydrate } from 'preact';
  */
 
 /**
- * @type {import('./index.d.ts')}
+ * @type {import('./index.d.ts').default}
  */
 export default function register(Component, tagName, propNames, options) {
-	function PreactElement() {
-		const inst = /** @type {PreactCustomElement} */ (
-			Reflect.construct(HTMLElement, [], PreactElement)
-		);
-		inst._vdomComponent = Component;
+	class PreactElement extends HTMLElement {
+		constructor() {
+			super();
 
-		if (options && options.shadow) {
-			inst._root = inst.attachShadow({
-				mode: options.mode || 'open',
-				serializable: options.serializable ?? false,
-			});
+			this._vdomComponent = Component;
+			if (options && options.shadow) {
+				this._root = this.attachShadow({
+					mode: options.mode || 'open',
+					serializable: options.serializable ?? false,
+				});
 
-			if (options.adoptedStyleSheets) {
-				inst._root.adoptedStyleSheets = options.adoptedStyleSheets;
+				if (options.adoptedStyleSheets) {
+					this._root.adoptedStyleSheets = options.adoptedStyleSheets;
+				}
+			} else {
+				this._root = this;
 			}
-		} else {
-			inst._root = inst;
 		}
 
-		return inst;
-	}
-	PreactElement.prototype = Object.create(HTMLElement.prototype);
-	PreactElement.prototype.constructor = PreactElement;
-	PreactElement.prototype.connectedCallback = function () {
-		connectedCallback.call(this, options);
-	};
-	PreactElement.prototype.attributeChangedCallback = attributeChangedCallback;
-	PreactElement.prototype.disconnectedCallback = disconnectedCallback;
+		connectedCallback() {
+			connectedCallback.call(this, options);
+		}
 
-	/**
-	 * @type {string[]}
-	 */
-	propNames =
-		propNames ||
-		Component.observedAttributes ||
-		Object.keys(Component.propTypes || {});
+		/**
+		 * Changed whenever an attribute of the HTML element changed
+		 *
+		 * @param {string} name The attribute name
+		 * @param {unknown} oldValue The old value or undefined
+		 * @param {unknown} newValue The new value
+		 */
+		attributeChangedCallback(name, oldValue, newValue) {
+			if (!this._vdom) return;
+			// Attributes use `null` as an empty value whereas `undefined` is more
+			// common in pure JS components, especially with default parameters.
+			// When calling `node.removeAttribute()` we'll receive `null` as the new
+			// value. See issue #50.
+			newValue = newValue == null ? undefined : newValue;
+			const props = {};
+			props[name] = newValue;
+			this._vdom = cloneElement(this._vdom, props);
+			render(this._vdom, this._root);
+		}
+
+		disconnectedCallback() {
+			render((this._vdom = null), this._root);
+		}
+	}
+
+	propNames = propNames || Component.observedAttributes || [];
 	PreactElement.observedAttributes = propNames;
 
-	if (Component.formAssociated) {
-		PreactElement.formAssociated = true;
-	}
+	PreactElement.formAssociated = Component.formAssociated || false;
 
 	// Keep DOM properties and Preact props in sync
 	propNames.forEach((name) => {
@@ -119,43 +130,6 @@ function connectedCallback(options) {
 }
 
 /**
- * Camel-cases a string
- * @param {string} str The string to transform to camelCase
- * @returns camel case version of the string
- */
-function toCamelCase(str) {
-	return str.replace(/-(\w)/g, (_, c) => (c ? c.toUpperCase() : ''));
-}
-
-/**
- * Changed whenver an attribute of the HTML element changed
- * @this {PreactCustomElement}
- * @param {string} name The attribute name
- * @param {unknown} oldValue The old value or undefined
- * @param {unknown} newValue The new value
- */
-function attributeChangedCallback(name, oldValue, newValue) {
-	if (!this._vdom) return;
-	// Attributes use `null` as an empty value whereas `undefined` is more
-	// common in pure JS components, especially with default parameters.
-	// When calling `node.removeAttribute()` we'll receive `null` as the new
-	// value. See issue #50.
-	newValue = newValue == null ? undefined : newValue;
-	const props = {};
-	props[name] = newValue;
-	props[toCamelCase(name)] = newValue;
-	this._vdom = cloneElement(this._vdom, props);
-	render(this._vdom, this._root);
-}
-
-/**
- * @this {PreactCustomElement}
- */
-function disconnectedCallback() {
-	render((this._vdom = null), this._root);
-}
-
-/**
  * Pass an event listener to each `<slot>` that "forwards" the current
  * context value to the rendered child. The child will trigger a custom
  * event, where will add the context value to. Because events work
@@ -191,7 +165,6 @@ function toVdom(element, nodeName, options) {
 	for (i = a.length; i--; ) {
 		if (a[i].name !== 'slot') {
 			props[a[i].name] = a[i].value;
-			props[toCamelCase(a[i].name)] = a[i].value;
 		}
 	}
 

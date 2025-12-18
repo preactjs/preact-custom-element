@@ -2,46 +2,33 @@
 	"name": "preact-custom-element",
 	"version": "4.6.0",
 	"description": "Wrap your component up as a custom element",
-	"source": "src/index.js",
+	"type": "module",
 	"types": "src/index.d.ts",
-	"main": "dist/preact-custom-element.js",
-	"module": "dist/preact-custom-element.esm.js",
-	"unpkg": "dist/preact-custom-element.umd.js",
+	"exports": {
+		".": {
+			"types": "./src/index.d.ts",
+			"default": "./dist/preact-custom-element.js"
+		},
+		"./package.json": "./package.json"
+	},
 	"scripts": {
 		"prepare": "npx simple-git-hooks",
-		"build": "microbundle -f cjs,es,umd --no-generateTypes",
-		"test": "npm run test:types & npm run test:browser",
+		"build": "mkdir -p dist && terser src/index.js -o dist/preact-custom-element.js --config-file terser-config.json",
+		"test": "npm run test:types && npm run test:browser",
 		"test:browser": "wtr test/browser/*.test.{js,jsx}",
 		"test:types": "tsc -p test/types/",
 		"lint": "eslint src/*.js",
 		"format": "prettier --write --ignore-path .gitignore '!README.md' .",
 		"prepublishOnly": "npm run build && npm run lint && npm run test"
 	},
-	"eslintConfig": {
-		"extends": "developit",
-		"settings": {
-			"react": {
-				"version": "16.8"
-			}
-		},
-		"ignorePatterns": [
-			"*.ts",
-			"*.tsx"
-		],
-		"rules": {
-			"brace-style": "off",
-			"jest/expect-expect": "off",
-			"lines-around-comment": "off",
-			"comma-dangle": "off",
-			"no-unused-vars": [
-				2,
-				{
-					"args": "none",
-					"varsIgnorePattern": "^h$"
-				}
-			]
-		}
-	},
+	"browserslist": [
+		"Chrome >= 80",
+		"ChromeAndroid >= 80",
+		"Safari >= 13.1",
+		"IOS >= 13.2",
+		"Firefox >= 72",
+		"Edge >= 80"
+	],
 	"repository": {
 		"type": "git",
 		"url": "git+https://github.com/preactjs/preact-custom-element.git"
@@ -71,17 +58,19 @@
 		"preact": ">= 10.25.0 || >=11.0.0-0"
 	},
 	"devDependencies": {
+		"@eslint/js": "^9.39.2",
 		"@open-wc/testing": "^4.0.0",
 		"@types/mocha": "^10.0.10",
 		"@web/dev-server-esbuild": "^1.0.4",
 		"@web/test-runner": "^0.20.2",
-		"eslint": "^7.7.0",
-		"eslint-config-developit": "^1.2.0",
-		"microbundle": "^0.15.1",
+		"eslint": "^9.39.2",
+		"eslint-plugin-compat": "^6.0.2",
+		"globals": "^16.5.0",
 		"nano-staged": "^0.8.0",
 		"preact": "^10.27.1",
 		"prettier": "^2.1.1",
 		"simple-git-hooks": "^2.13.1",
+		"terser": "^5.44.1",
 		"typescript": "^5.9.2"
 	},
 	"simple-git-hooks": {

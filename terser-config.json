@@ -1,0 +1,24 @@
+{
+	"compress": {
+		"keep_infinity": true,
+		"pure_getters": true,
+		"passes": 10,
+		"collapse_vars": true,
+		"reduce_vars": true,
+		"dead_code": true,
+		"evaluate": true,
+		"join_vars": true,
+		"reduce_funcs": true
+	},
+	"format": {
+		"wrap_func_args": false,
+		"comments": false,
+		"preserve_annotations": true
+	},
+	"ecma": 2020,
+	"sourceMap": {
+		"includeSources": true,
+		"url": "preact-custom-element.js.map"
+	},
+	"module": true
+}
