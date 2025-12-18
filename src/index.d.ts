@@ -52,4 +52,6 @@ export default function register<P = {}, S = {}>(
 	tagName?: string,
 	propNames?: (keyof P)[],
 	options?: Options
-): HTMLElement;
+): typeof HTMLElement & {
+	new (): HTMLElement;
+};

@@ -8,44 +8,58 @@ import { h, cloneElement, render, hydrate } from 'preact';
  * @type {import('./index.d.ts').default}
  */
 export default function register(Component, tagName, propNames, options) {
-	function PreactElement() {
-		const inst = /** @type {PreactCustomElement} */ (
-			Reflect.construct(HTMLElement, [], PreactElement)
-		);
-		inst._vdomComponent = Component;
+	class PreactElement extends HTMLElement {
+		constructor() {
+			super();
 
-		if (options && options.shadow) {
-			inst._root = inst.attachShadow({
-				mode: options.mode || 'open',
-				serializable: options.serializable ?? false,
-			});
+			this._vdomComponent = Component;
+			if (options && options.shadow) {
+				this._root = this.attachShadow({
+					mode: options.mode || 'open',
+					serializable: options.serializable ?? false,
+				});
 
-			if (options.adoptedStyleSheets) {
-				inst._root.adoptedStyleSheets = options.adoptedStyleSheets;
+				if (options.adoptedStyleSheets) {
+					this._root.adoptedStyleSheets = options.adoptedStyleSheets;
+				}
+			} else {
+				this._root = this;
 			}
-		} else {
-			inst._root = inst;
 		}
 
-		return inst;
-	}
-	PreactElement.prototype = Object.create(HTMLElement.prototype);
-	PreactElement.prototype.constructor = PreactElement;
-	PreactElement.prototype.connectedCallback = function () {
-		connectedCallback.call(this, options);
-	};
-	PreactElement.prototype.attributeChangedCallback = attributeChangedCallback;
-	PreactElement.prototype.disconnectedCallback = disconnectedCallback;
+		connectedCallback() {
+			connectedCallback.call(this, options);
+		}
 
-	/**
-	 * @type {string[]}
-	 */
+		/**
+		 * Changed whenever an attribute of the HTML element changed
+		 *
+		 * @param {string} name The attribute name
+		 * @param {unknown} oldValue The old value or undefined
+		 * @param {unknown} newValue The new value
+		 */
+		attributeChangedCallback(name, oldValue, newValue) {
+			if (!this._vdom) return;
+			// Attributes use `null` as an empty value whereas `undefined` is more
+			// common in pure JS components, especially with default parameters.
+			// When calling `node.removeAttribute()` we'll receive `null` as the new
+			// value. See issue #50.
+			newValue = newValue == null ? undefined : newValue;
+			const props = {};
+			props[name] = newValue;
+			this._vdom = cloneElement(this._vdom, props);
+			render(this._vdom, this._root);
+		}
+
+		disconnectedCallback() {
+			render((this._vdom = null), this._root);
+		}
+	}
+
 	propNames = propNames || Component.observedAttributes || [];
 	PreactElement.observedAttributes = propNames;
 
-	if (Component.formAssociated) {
-		PreactElement.formAssociated = true;
-	}
+	PreactElement.formAssociated = Component.formAssociated || false;
 
 	// Keep DOM properties and Preact props in sync
 	propNames.forEach((name) => {
@@ -113,33 +127,6 @@ function connectedCallback(options) {
 		toVdom(this, this._vdomComponent, options)
 	);
 	(this.hasAttribute('hydrate') ? hydrate : render)(this._vdom, this._root);
-}
-
-/**
- * Changed whenver an attribute of the HTML element changed
- * @this {PreactCustomElement}
- * @param {string} name The attribute name
- * @param {unknown} oldValue The old value or undefined
- * @param {unknown} newValue The new value
- */
-function attributeChangedCallback(name, oldValue, newValue) {
-	if (!this._vdom) return;
-	// Attributes use `null` as an empty value whereas `undefined` is more
-	// common in pure JS components, especially with default parameters.
-	// When calling `node.removeAttribute()` we'll receive `null` as the new
-	// value. See issue #50.
-	newValue = newValue == null ? undefined : newValue;
-	const props = {};
-	props[name] = newValue;
-	this._vdom = cloneElement(this._vdom, props);
-	render(this._vdom, this._root);
-}
-
-/**
- * @this {PreactCustomElement}
- */
-function disconnectedCallback() {
-	render((this._vdom = null), this._root);
 }
 
 /**
