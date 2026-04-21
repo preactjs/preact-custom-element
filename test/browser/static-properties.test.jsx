@@ -1,17 +1,21 @@
 import { assert } from '@open-wc/testing';
-import { h, Component } from 'preact';
+import { h, Component, options as preactOptions } from 'preact';
 import registerElement from '../../src/index';
 
 describe('static properties', () => {
+	let previousDebounceRendering;
 	/** @type {HTMLDivElement} */
 	let root;
 
 	beforeEach(() => {
+		previousDebounceRendering = preactOptions.debounceRendering;
+		preactOptions.debounceRendering = (callback) => callback();
 		root = document.createElement('div');
 		document.body.appendChild(root);
 	});
 
 	afterEach(() => {
+		preactOptions.debounceRendering = previousDebounceRendering;
 		document.body.removeChild(root);
 	});
 

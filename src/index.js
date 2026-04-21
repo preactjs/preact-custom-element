@@ -1,4 +1,10 @@
-import { h, cloneElement, render, hydrate } from 'preact';
+import {
+	h,
+	cloneElement,
+	render,
+	hydrate,
+	options as preactOptions,
+} from 'preact';
 
 /**
  * @typedef {import('./internal.d.ts').PreactCustomElement} PreactCustomElement
@@ -12,6 +18,7 @@ export default function register(Component, tagName, propNames, options) {
 		const inst = /** @type {PreactCustomElement} */ (
 			Reflect.construct(HTMLElement, [], PreactElement)
 		);
+		inst._options = options;
 		inst._vdomComponent = Component;
 
 		if (options && options.shadow) {
@@ -31,9 +38,7 @@ export default function register(Component, tagName, propNames, options) {
 	}
 	PreactElement.prototype = Object.create(HTMLElement.prototype);
 	PreactElement.prototype.constructor = PreactElement;
-	PreactElement.prototype.connectedCallback = function () {
-		connectedCallback.call(this, options);
-	};
+	PreactElement.prototype.connectedCallback = connectedCallback;
 	PreactElement.prototype.attributeChangedCallback = attributeChangedCallback;
 	PreactElement.prototype.disconnectedCallback = disconnectedCallback;
 
@@ -54,10 +59,16 @@ export default function register(Component, tagName, propNames, options) {
 	propNames.forEach((name) => {
 		Object.defineProperty(PreactElement.prototype, name, {
 			get() {
-				return this._vdom ? this._vdom.props[name] : this._props[name];
+				if (this._pendingProps && name in this._pendingProps) {
+					return this._pendingProps[name];
+				}
+
+				return this._vdom
+					? this._vdom.props[name]
+					: this._props && this._props[name];
 			},
 			set(v) {
-				if (this._vdom) {
+				if (this._vdom || this.isConnected) {
 					this.attributeChangedCallback(name, null, v);
 				} else {
 					if (!this._props) this._props = {};
@@ -94,9 +105,9 @@ function ContextProvider(props) {
 }
 
 /**
- * @this {PreactCustomElement}
+ * @param {PreactCustomElement} element
  */
-function connectedCallback(options) {
+function createVdom(element) {
 	// Obtain a reference to the previous context by pinging the nearest
 	// higher up node that was rendered with Preact. If one Preact component
 	// higher up receives our ping, it will set the `detail` property of
@@ -107,15 +118,22 @@ function connectedCallback(options) {
 		bubbles: true,
 		cancelable: true,
 	});
-	this.dispatchEvent(event);
+	element.dispatchEvent(event);
 	const context = event.detail.context;
 
-	this._vdom = h(
+	return h(
 		ContextProvider,
-		{ ...this._props, context },
-		toVdom(this, this._vdomComponent, options)
+		{ ...element._props, context },
+		toVdom(element, element._vdomComponent, element._options)
 	);
-	(this.hasAttribute('hydrate') ? hydrate : render)(this._vdom, this._root);
+}
+
+/**
+ * @this {PreactCustomElement}
+ */
+function connectedCallback() {
+	this._vdom = null;
+	enqueueRender(this);
 }
 
 /**
@@ -128,6 +146,49 @@ function toCamelCase(str) {
 }
 
 /**
+ * @param {PreactCustomElement} element
+ */
+function enqueueRender(element) {
+	if (element._renderQueued) return;
+
+	element._renderQueued = true;
+	(preactOptions.debounceRendering || queueMicrotask)(() => {
+		element._renderQueued = false;
+		flushRender(element);
+	});
+}
+
+/**
+ * @param {PreactCustomElement} element
+ */
+function flushRender(element) {
+	if (!element.isConnected) {
+		element._pendingProps = null;
+
+		if (!element._vdom) return;
+
+		element._mounted = false;
+		render((element._vdom = null), element._root);
+		return;
+	}
+
+	if (!element._vdom) {
+		element._vdom = createVdom(element);
+		element._pendingProps = null;
+	} else if (element._pendingProps) {
+		const props = element._pendingProps;
+		element._pendingProps = null;
+		element._vdom = cloneElement(element._vdom, props);
+	}
+
+	(element._mounted || !element.hasAttribute('hydrate') ? render : hydrate)(
+		element._vdom,
+		element._root
+	);
+	element._mounted = true;
+}
+
+/**
  * Changed whenver an attribute of the HTML element changed
  * @this {PreactCustomElement}
  * @param {string} name The attribute name
@@ -135,24 +196,31 @@ function toCamelCase(str) {
  * @param {unknown} newValue The new value
  */
 function attributeChangedCallback(name, oldValue, newValue) {
-	if (!this._vdom) return;
 	// Attributes use `null` as an empty value whereas `undefined` is more
 	// common in pure JS components, especially with default parameters.
 	// When calling `node.removeAttribute()` we'll receive `null` as the new
 	// value. See issue #50.
 	newValue = newValue == null ? undefined : newValue;
-	const props = {};
-	props[name] = newValue;
-	props[toCamelCase(name)] = newValue;
-	this._vdom = cloneElement(this._vdom, props);
-	render(this._vdom, this._root);
+	if (!this._props) this._props = {};
+	this._props[name] = newValue;
+	this._props[toCamelCase(name)] = newValue;
+
+	if (this._vdom) {
+		if (!this._pendingProps) this._pendingProps = {};
+		this._pendingProps[name] = newValue;
+		this._pendingProps[toCamelCase(name)] = newValue;
+	}
+
+	if (this.isConnected) {
+		enqueueRender(this);
+	}
 }
 
 /**
  * @this {PreactCustomElement}
  */
 function disconnectedCallback() {
-	render((this._vdom = null), this._root);
+	enqueueRender(this);
 }
 
 /**
