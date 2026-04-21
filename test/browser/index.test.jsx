@@ -1,19 +1,25 @@
 import { assert } from '@open-wc/testing';
-import { h, createContext, Fragment } from 'preact';
+import { h, createContext, Fragment, options as preactOptions } from 'preact';
 import { useContext } from 'preact/hooks';
 import { act } from 'preact/test-utils';
 import registerElement from '../../src/index';
 
+const flushRender = () => Promise.resolve();
+
 describe('web components', () => {
+	let previousDebounceRendering;
 	/** @type {HTMLDivElement} */
 	let root;
 
 	beforeEach(() => {
+		previousDebounceRendering = preactOptions.debounceRendering;
+		preactOptions.debounceRendering = (callback) => callback();
 		root = document.createElement('div');
 		document.body.appendChild(root);
 	});
 
 	afterEach(() => {
+		preactOptions.debounceRendering = previousDebounceRendering;
 		document.body.removeChild(root);
 	});
 
@@ -38,6 +44,68 @@ describe('web components', () => {
 			root.innerHTML,
 			'<x-clock time="11:01:10 AM"><span>11:01:10 AM</span></x-clock>'
 		);
+	});
+
+	it('batches multiple attribute changes into one deferred render', async () => {
+		preactOptions.debounceRendering = undefined;
+
+		let renders = 0;
+		function Clock({ hours = '', minutes = '' }) {
+			renders++;
+			return (
+				<span>
+					{hours}:{minutes}
+				</span>
+			);
+		}
+
+		registerElement(Clock, 'x-batched-clock', ['hours', 'minutes']);
+
+		const el = document.createElement('x-batched-clock');
+		root.appendChild(el);
+
+		assert.equal(renders, 0);
+		assert.equal(el.innerHTML, '');
+
+		await flushRender();
+
+		assert.equal(renders, 1);
+		assert.equal(el.querySelector('span').textContent, ':');
+
+		el.setAttribute('hours', '10');
+		el.setAttribute('minutes', '30');
+
+		assert.equal(renders, 1);
+		assert.equal(el.querySelector('span').textContent, ':');
+
+		await flushRender();
+
+		assert.equal(renders, 2);
+		assert.equal(el.querySelector('span').textContent, '10:30');
+	});
+
+	it('defers mount and unmount', async () => {
+		preactOptions.debounceRendering = undefined;
+
+		function Clock() {
+			return <span>ready</span>;
+		}
+
+		registerElement(Clock, 'x-deferred-mount', []);
+
+		const el = document.createElement('x-deferred-mount');
+		root.appendChild(el);
+
+		assert.equal(el.innerHTML, '');
+
+		await flushRender();
+		assert.equal(el.innerHTML, '<span>ready</span>');
+
+		root.removeChild(el);
+		assert.equal(el.innerHTML, '<span>ready</span>');
+
+		await flushRender();
+		assert.equal(el.innerHTML, '');
 	});
 
 	// #50
@@ -341,6 +409,27 @@ describe('web components', () => {
 			// Trigger context update
 			act(() => {
 				el.setAttribute('theme', 'sunny');
+			});
+			assert.equal(getShadowHTML(), '<p>Active theme: sunny</p>');
+		});
+
+		it('passes context over custom element boundaries with deferred mounts', async () => {
+			preactOptions.debounceRendering = undefined;
+
+			const el = document.createElement('x-parent');
+			const noSlot = document.createElement('x-display-theme');
+			el.appendChild(noSlot);
+
+			root.appendChild(el);
+			await flushRender();
+
+			const getShadowHTML = () =>
+				document.querySelector('x-display-theme').shadowRoot.innerHTML;
+			assert.equal(getShadowHTML(), '<p>Active theme: dark</p>');
+
+			await act(async () => {
+				el.setAttribute('theme', 'sunny');
+				await flushRender();
 			});
 			assert.equal(getShadowHTML(), '<p>Active theme: sunny</p>');
 		});
