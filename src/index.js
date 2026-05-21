@@ -14,6 +14,13 @@ export default function register(Component, tagName, propNames, options) {
 		);
 		inst._vdomComponent = Component;
 
+		if (Component.internals) {
+			const internals = inst.attachInternals();
+			for (const key in Component.internals) {
+				internals[key] = Component.internals[key];
+			}
+		}
+
 		if (options && options.shadow) {
 			inst._root = inst.attachShadow({
 				mode: options.mode || 'open',

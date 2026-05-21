@@ -88,6 +88,49 @@ describe('static properties', () => {
 		);
 	});
 
+	it('supports `internals`', () => {
+		const captured = [];
+		const orig = HTMLElement.prototype.attachInternals;
+		HTMLElement.prototype.attachInternals = function () {
+			const i = orig.call(this);
+			captured.push(i);
+			return i;
+		};
+
+		try {
+			class InternalsClass extends Component {
+				static internals = { role: 'group', ariaLabel: 'class label' };
+
+				render() {
+					return <div>internals-class</div>;
+				}
+			}
+			registerElement(InternalsClass, 'x-internals-class', []);
+
+			function InternalsFunction() {
+				return <div>internals-function</div>;
+			}
+			InternalsFunction.internals = {
+				role: 'list',
+				ariaLabel: 'function label',
+			};
+			registerElement(InternalsFunction, 'x-internals-function', []);
+
+			const classEl = document.createElement('x-internals-class');
+			const fnEl = document.createElement('x-internals-function');
+			root.appendChild(classEl);
+			root.appendChild(fnEl);
+
+			assert.equal(captured.length, 2);
+			assert.equal(captured[0].role, 'group');
+			assert.equal(captured[0].ariaLabel, 'class label');
+			assert.equal(captured[1].role, 'list');
+			assert.equal(captured[1].ariaLabel, 'function label');
+		} finally {
+			HTMLElement.prototype.attachInternals = orig;
+		}
+	});
+
 	it('supports `formAssociated`', () => {
 		class FormAssociatedClass extends Component {
 			static formAssociated = true;

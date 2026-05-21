@@ -1,4 +1,4 @@
-import { h } from 'preact';
+import { h, Component } from 'preact';
 import registerElement from '../../src/index';
 
 interface AppProps {
@@ -19,3 +19,11 @@ registerElement(App, 'my-app-shadow', ['name'], {
 	// @ts-expect-error should not set shadow DOM mode when `shadow` is false
 	mode: 'open',
 });
+
+class WithInternals extends Component<AppProps> {
+	static internals = { role: 'group', ariaLabel: 'demo' };
+	render() {
+		return <h1>internals</h1>;
+	}
+}
+registerElement(WithInternals, 'my-app-internals', ['name']);

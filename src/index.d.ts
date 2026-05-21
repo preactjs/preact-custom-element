@@ -5,6 +5,7 @@ type StaticProperties<P> = {
 	observedAttributes?: (keyof P)[];
 	propTypes?: Record<keyof P, any>;
 	formAssociated?: boolean;
+	internals?: Partial<ElementInternals>;
 };
 
 type Options =
