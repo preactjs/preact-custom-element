@@ -81,6 +81,18 @@ FullName.propTypes = {
 register(FullName, 'full-name');
 ```
 
+### Hydration
+
+Specify a `hydrate` attribute on the custom element to use Preact's [`hydrate()`](https://preactjs.com/guide/v10/api-reference/#hydrate) instead of `render()` on first connect. This preserves existing server-rendered or statically generated markup (zero-mutation hydration):
+
+```html
+<x-greeting name="World" hydrate>
+  <p>Hello, World!</p>
+</x-greeting>
+```
+
+The `hydrate` attribute does **not** work when Shadow DOM is enabled (`shadow: true` in the register options). Hydration expects the existing markup to live in the same root Preact attaches to; with a shadow root that markup is outside the render target. See [#72](https://github.com/preactjs/preact-custom-element/pull/72#issuecomment-1166298037) and [#52](https://github.com/preactjs/preact-custom-element/issues/52).
+
 ### Passing slots as props
 
 The `register()` function also accepts an optional fourth parameter, an options bag. At present, it allows you to opt-in to using shadow DOM for your custom element by setting the `shadow` property to `true`, and if so, you can also specify the encapsulation mode with `mode`, which can be either `'open'` or `'closed'`. Additionally, you may mark the shadow root as being serializable with the boolean `serializable` property.
